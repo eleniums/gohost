@@ -1,14 +1,15 @@
 package gohost
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/rs/cors"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // ServeGRPC starts a gRPC endpoint for the given server.
@@ -29,6 +30,21 @@ func ServeGRPC(server Server, grpcAddr string, opts []grpc.ServerOption) error {
 	}
 
 	return nil
+}
+
+// ServeGRPCWithTLS starts a gRPC endpoint for the given server with TLS enabled.
+func ServeGRPCWithTLS(server Server, grpcAddr string, opts []grpc.ServerOption, certFile string, keyFile string) error {
+	// create TLS credentials
+	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+	if err != nil {
+		return fmt.Errorf("failed to generate TLS credentials: %v", err)
+	}
+
+	// add TLS credentials to options
+	opts = append(opts, grpc.Creds(creds))
+
+	// start server
+	return ServeGRPC(server, grpcAddr, opts)
 }
 
 // ServeHTTP starts an HTTP endpoint for a given server. This is a gateway pointing to a gRPC endpoint.
