@@ -51,7 +51,7 @@ func ServeGRPCWithTLS(server Server, grpcAddr string, opts []grpc.ServerOption, 
 // ServeHTTP starts an HTTP endpoint for a given server. This is a gateway pointing to a gRPC endpoint.
 func ServeHTTP(server Server, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption) error {
 	// start server
-	return serveHTTP(server, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
+	return serveHTTPInternal(server, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
 		return http.ListenAndServe(addr, handler)
 	})
 }
@@ -67,13 +67,13 @@ func ServeHTTPWithTLS(server Server, httpAddr string, grpcAddr string, enableCOR
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
 	// start server
-	return serveHTTP(server, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
+	return serveHTTPInternal(server, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
 		return http.ListenAndServeTLS(addr, certFile, keyFile, handler)
 	})
 }
 
-// serveHTTP starts an HTTP endpoint for a given server. This is a gateway pointing to a gRPC endpoint.
-func serveHTTP(server Server, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, listenAndServe func(addr string, handler http.Handler) error) error {
+// serveHTTPInternal is an internal method for serving up an HTTP endpoint.
+func serveHTTPInternal(server Server, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, listenAndServe func(addr string, handler http.Handler) error) error {
 	// create context
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
