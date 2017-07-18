@@ -39,19 +39,20 @@ func ServeHTTP(server Server, httpAddr string, grpcAddr string, enableCORS bool,
 	defer cancel()
 
 	// register server
-	mux := runtime.NewServeMux()
-	err := server.RegisterHandler(ctx, mux, grpcAddr, opts)
+	var handler http.Handler
+	handler = runtime.NewServeMux()
+	err := server.RegisterHandler(ctx, handler, grpcAddr, opts)
 	if err != nil {
 		return fmt.Errorf("failed to register HTTP endpoint: %v", err)
 	}
 
 	// enable CORS if requested
 	if enableCORS {
-		mux := cors.AllowAll().Handler(mux)
+		handler = cors.AllowAll().Handler(handler)
 	}
 
 	// start server
-	err = http.ListenAndServe(httpAddr, mux)
+	err = http.ListenAndServe(httpAddr, handler)
 	if err != nil {
 		return fmt.Errorf("failed to serve HTTP endpoint: %v", err)
 	}
