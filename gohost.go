@@ -1,6 +1,7 @@
 package gohost
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
@@ -49,6 +50,30 @@ func ServeGRPCWithTLS(server Server, grpcAddr string, opts []grpc.ServerOption, 
 
 // ServeHTTP starts an HTTP endpoint for a given server. This is a gateway pointing to a gRPC endpoint.
 func ServeHTTP(server Server, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption) error {
+	// start server
+	return serveHTTP(server, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
+		return http.ListenAndServe(addr, handler)
+	})
+}
+
+// ServeHTTPWithTLS starts an HTTP endpoint for a given server with TLS enabled. This is a gateway pointing to a gRPC endpoint.
+func ServeHTTPWithTLS(server Server, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, certFile string, keyFile string, insecureSkipVerify bool) error {
+	// create TLS credentials
+	creds := credentials.NewTLS(&tls.Config{
+		InsecureSkipVerify: insecureSkipVerify,
+	})
+
+	// add TLS credentials to options
+	opts = append(opts, grpc.WithTransportCredentials(creds))
+
+	// start server
+	return serveHTTP(server, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
+		return http.ListenAndServeTLS(addr, certFile, keyFile, handler)
+	})
+}
+
+// serveHTTP starts an HTTP endpoint for a given server. This is a gateway pointing to a gRPC endpoint.
+func serveHTTP(server Server, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, listenAndServe func(addr string, handler http.Handler) error) error {
 	// create context
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -68,7 +93,7 @@ func ServeHTTP(server Server, httpAddr string, grpcAddr string, enableCORS bool,
 	}
 
 	// start server
-	err = http.ListenAndServe(httpAddr, handler)
+	err = listenAndServe(httpAddr, handler)
 	if err != nil {
 		return fmt.Errorf("failed to serve HTTP endpoint: %v", err)
 	}
