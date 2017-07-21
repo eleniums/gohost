@@ -4,14 +4,14 @@
 [[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
-  packages = ["jsonpb","proto","ptypes/any","ptypes/struct"]
+  packages = ["jsonpb","proto","protoc-gen-go/descriptor","ptypes/any","ptypes/struct"]
   revision = "0a4f71a498b7c4812f64969510bcb4eca251e33a"
 
 [[projects]]
   name = "github.com/grpc-ecosystem/grpc-gateway"
   packages = ["runtime","runtime/internal","utilities"]
-  revision = "589b126116b5fc961939b3e156c29e4d9d58222f"
-  version = "v1.2.2"
+  revision = "18d159699f2e83fc5bb9ef2f79465ca3f3122676"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/rs/cors"
@@ -34,7 +34,7 @@
 [[projects]]
   branch = "master"
   name = "google.golang.org/genproto"
-  packages = ["googleapis/rpc/status"]
+  packages = ["googleapis/api/annotations","googleapis/rpc/status"]
   revision = "b0a3dcfcd1a9bd48e63634bd8802960804cf8315"
 
 [[projects]]
@@ -46,6 +46,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d8874b68ebf489dfb9150827a7bea5c3704307ab62c8bedb1beecb095fab2a15"
+  inputs-digest = "9128b8cd016131848beec73df196d575c3075b9ee5137ee53bdfce277a51d002"
   solver-name = "gps-cdcl"
   solver-version = 1
