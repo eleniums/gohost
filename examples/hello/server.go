@@ -2,16 +2,16 @@ package hello
 
 import (
 	"fmt"
-	"net/http"
 
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pb "github.com/eleniums/gohost/examples/hello/proto"
 )
 
-type Server struct {
-}
+// Server contains the implementation for the gRPC service.
+type Server struct{}
 
 // Hello will return a personalized greeting.
 func (s *Server) Hello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
@@ -26,6 +26,6 @@ func (s *Server) RegisterServer(grpc *grpc.Server) {
 }
 
 // RegisterHandler registers this server to be an HTTP endpoint.
-func (s *Server) RegisterHandler(ctx context.Context, handler http.Handler, endpoint string, opts []grpc.DialOption) error {
-	return pb.RegisterHelloServiceHandlerFromEndpoint(ctx, handler, endpoint, opts)
+func (s *Server) RegisterHandler(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
+	return pb.RegisterHelloServiceHandlerFromEndpoint(ctx, mux, endpoint, opts)
 }

@@ -1,8 +1,7 @@
 package gohost
 
 import (
-	"net/http"
-
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -13,5 +12,5 @@ type Server interface {
 	RegisterServer(grpc *grpc.Server)
 
 	// RegisterHandler registers this server to be an HTTP endpoint.
-	RegisterHandler(ctx context.Context, handler http.Handler, endpoint string, opts []grpc.DialOption) error
+	RegisterHandler(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error
 }

@@ -80,16 +80,16 @@ func serveHTTPInternal(server Server, httpAddr string, grpcAddr string, enableCO
 	defer cancel()
 
 	// register server
-	var handler http.Handler
-	handler = runtime.NewServeMux()
-	err := server.RegisterHandler(ctx, handler, grpcAddr, opts)
+	mux := runtime.NewServeMux()
+	err := server.RegisterHandler(ctx, mux, grpcAddr, opts)
 	if err != nil {
 		return fmt.Errorf("failed to register HTTP endpoint: %v", err)
 	}
 
 	// enable CORS if requested
+	var handler http.Handler = mux
 	if enableCORS {
-		handler = cors.AllowAll().Handler(handler)
+		handler = cors.AllowAll().Handler(mux)
 	}
 
 	// start server
