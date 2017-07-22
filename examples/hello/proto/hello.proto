@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hello;
+
+import "google/api/annotations.proto";
+
+// A sample service that will return a greeting to the caller.
+service HelloService {
+  // Request a personalized greeting.
+  rpc Hello(HelloRequest) returns (HelloResponse) {
+      option (google.api.http) = {
+        get: "/v1/hello"
+    };
+  }
+}
+
+// Request for service to say hello.
+message HelloRequest {
+  // Name of caller.
+  string name = 1;
+}
+
+// Response with greeting from service.
+message HelloResponse {
+  // Greeting from service.
+  string greeting = 1;
+}

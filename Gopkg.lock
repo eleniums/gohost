@@ -4,7 +4,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
-  packages = ["jsonpb","proto","ptypes/any","ptypes/struct"]
+  packages = ["jsonpb","proto","protoc-gen-go/descriptor","ptypes/any","ptypes/struct"]
   revision = "0a4f71a498b7c4812f64969510bcb4eca251e33a"
 
 [[projects]]
@@ -34,7 +34,7 @@
 [[projects]]
   branch = "master"
   name = "google.golang.org/genproto"
-  packages = ["googleapis/rpc/status"]
+  packages = ["googleapis/api/annotations","googleapis/rpc/status"]
   revision = "b0a3dcfcd1a9bd48e63634bd8802960804cf8315"
 
 [[projects]]
@@ -46,6 +46,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d8874b68ebf489dfb9150827a7bea5c3704307ab62c8bedb1beecb095fab2a15"
+  inputs-digest = "cec5a0e7d887c8fb118d0429e13cfede2d850f93297564b4eb0ac4f41108ca29"
   solver-name = "gps-cdcl"
   solver-version = 1
