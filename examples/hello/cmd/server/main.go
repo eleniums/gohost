@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// CLI flags
+	// command-line flags
 	grpcAddr := flag.String("grpc-addr", "127.0.0.1:50051", "host and port to host the gRPC endpoint")
 	httpAddr := flag.String("http-addr", "127.0.0.1:9090", "host and port to host the HTTP endpoint")
 	enableCors := flag.Bool("enable-cors", true, "true to enable cross-origin resource sharing (CORS)")

@@ -20,3 +20,6 @@
 
 # Run the server
 go run cmd/server/main.go
+
+# Test with the command line client
+go run cmd/cli/main.go -name <yournamehere>
