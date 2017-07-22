@@ -25,6 +25,7 @@ type Hoster struct {
 	EnableCORS         bool
 	MaxSendMsgSize     int
 	MaxRecvMsgSize     int
+	Log                func(format string, v ...interface{})
 }
 
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
@@ -40,6 +41,9 @@ func NewHoster(server Server, grpcAddr string) *Hoster {
 // ListenAndServe creates and starts the server.
 func (h *Hoster) ListenAndServe() error {
 	// validate parameters
+	if h.Server == nil {
+		return errors.New("gRPC service implementation must be provided")
+	}
 	if h.GRPCAddr == "" {
 		return errors.New("gRPC address must be provided")
 	}
@@ -53,8 +57,10 @@ func (h *Hoster) ListenAndServe() error {
 
 		// start the HTTP endpoint
 		if h.IsTLSEnabled() {
+			h.Log("Starting HTTP endpoint with TLS enabled: %v", h.HTTPAddr)
 			go ServeHTTPWithTLS(h.Server, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify)
 		} else {
+			h.Log("Starting insecure HTTP endpoint: %v", h.HTTPAddr)
 			go ServeHTTP(h.Server, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
 		}
 	}
@@ -67,9 +73,11 @@ func (h *Hoster) ListenAndServe() error {
 
 	// start the gRPC endpoint
 	if h.IsTLSEnabled() {
+		h.Log("Starting gRPC endpoint with TLS enabled: %v", h.GRPCAddr)
 		return ServeGRPCWithTLS(h.Server, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
 	}
 
+	h.Log("Starting insecure gRPC endpoint: %v", h.GRPCAddr)
 	return ServeGRPC(h.Server, h.GRPCAddr, serverOpts)
 }
 

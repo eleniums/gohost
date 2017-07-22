@@ -32,6 +32,7 @@ func main() {
 	hoster.InsecureSkipVerify = *insecureSkipVerify
 	hoster.MaxSendMsgSize = *maxSendMsgSize
 	hoster.MaxRecvMsgSize = *maxRecvMsgSize
+	hoster.Log = log.Printf
 
 	// start the service
 	err := hoster.ListenAndServe()
