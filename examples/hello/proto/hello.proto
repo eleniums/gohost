@@ -6,7 +6,6 @@ import "google/api/annotations.proto";
 
 // A sample service that will return a greeting to the caller.
 service HelloService {
-
   // Request a personalized greeting.
   rpc Hello(HelloRequest) returns (HelloResponse) {
       option (google.api.http) = {
