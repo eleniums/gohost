@@ -50,6 +50,9 @@ func ServeGRPCWithTLS(server Server, grpcAddr string, opts []grpc.ServerOption, 
 
 // ServeHTTP starts an HTTP endpoint for a given server. This is a gateway pointing to a gRPC endpoint.
 func ServeHTTP(server Server, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption) error {
+	// do not use TLS
+	opts = append(opts, grpc.WithInsecure())
+
 	// start server
 	return serveHTTPInternal(server, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
 		return http.ListenAndServe(addr, handler)

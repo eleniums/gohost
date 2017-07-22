@@ -16,7 +16,7 @@
   ],
   "paths": {
     "/v1/hello": {
-      "post": {
+      "get": {
         "summary": "Request a personalized greeting.",
         "operationId": "Hello",
         "responses": {
@@ -29,12 +29,11 @@
         },
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/helloHelloRequest"
-            }
+            "name": "name",
+            "description": "Name of caller.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
