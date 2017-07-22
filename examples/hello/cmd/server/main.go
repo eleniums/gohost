@@ -20,11 +20,11 @@ func main() {
 	maxRecvMsgSize := flag.Int("max-recv-msg-size", gohost.DefaultMaxRecvMsgSize, "max message size the service is allowed to receive")
 	flag.Parse()
 
-	// create the server
-	server := hello.NewServer()
+	// create the service
+	service := hello.NewService()
 
 	// create the hoster
-	hoster := gohost.NewHoster(server, *grpcAddr)
+	hoster := gohost.NewHoster(service, *grpcAddr)
 	hoster.HTTPAddr = *httpAddr
 	hoster.EnableCORS = *enableCors
 	hoster.CertFile = *certFile
@@ -32,11 +32,11 @@ func main() {
 	hoster.InsecureSkipVerify = *insecureSkipVerify
 	hoster.MaxSendMsgSize = *maxSendMsgSize
 	hoster.MaxRecvMsgSize = *maxRecvMsgSize
-	hoster.Log = log.Printf
+	hoster.Logger = log.Printf
 
-	// start the service
+	// start the server
 	err := hoster.ListenAndServe()
 	if err != nil {
-		log.Fatalf("unable to start the service: %v", err)
+		log.Fatalf("unable to start the server: %v", err)
 	}
 }

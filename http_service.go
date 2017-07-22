@@ -8,6 +8,6 @@ import (
 
 // HTTPService is the interface for a hosted service with a HTTP endpoint.
 type HTTPService interface {
-	// RegisterHandler registers this server to be an HTTP endpoint.
+	// RegisterHandler registers the HTTP handler to use with a service.
 	RegisterHandler(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error
 }
