@@ -1,10 +1,11 @@
-package hello
+package main
 
 import (
 	"flag"
 	"log"
 
 	"github.com/eleniums/gohost"
+	"github.com/eleniums/gohost/examples/hello"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	// create the server
-	server := NewServer()
+	server := hello.NewServer()
 
 	// create the hoster
 	hoster := gohost.NewHoster(server, *grpcAddr)
