@@ -13,6 +13,11 @@ import (
 // Server contains the implementation for the gRPC service.
 type Server struct{}
 
+// NewServer creates a new instance of Server.
+func NewServer() *Server {
+	return &Server{}
+}
+
 // Hello will return a personalized greeting.
 func (s *Server) Hello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
 	return &pb.HelloResponse{

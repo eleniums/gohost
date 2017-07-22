@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	// DefaultMaxRecvMsgSize is the default max receive message size, per gRPC
-	DefaultMaxRecvMsgSize = 1024 * 1024 * 4
-
 	// DefaultMaxSendMsgSize is the default max send message size, per gRPC
 	DefaultMaxSendMsgSize = 1024 * 1024 * 4
+
+	// DefaultMaxRecvMsgSize is the default max receive message size, per gRPC
+	DefaultMaxRecvMsgSize = 1024 * 1024 * 4
 )
 
 // Hoster is used to serve gRPC and HTTP endpoints.
@@ -23,8 +23,8 @@ type Hoster struct {
 	KeyFile            string
 	InsecureSkipVerify bool
 	EnableCORS         bool
-	MaxRecvMsgSize     int
 	MaxSendMsgSize     int
+	MaxRecvMsgSize     int
 }
 
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
@@ -32,8 +32,8 @@ func NewHoster(server Server, grpcAddr string) *Hoster {
 	return &Hoster{
 		Server:         server,
 		GRPCAddr:       grpcAddr,
-		MaxRecvMsgSize: DefaultMaxRecvMsgSize,
 		MaxSendMsgSize: DefaultMaxSendMsgSize,
+		MaxRecvMsgSize: DefaultMaxRecvMsgSize,
 	}
 }
 
@@ -61,8 +61,8 @@ func (h *Hoster) ListenAndServe() error {
 
 	// configure server options
 	serverOpts := []grpc.ServerOption{
-		grpc.MaxRecvMsgSize(h.MaxRecvMsgSize),
 		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
+		grpc.MaxRecvMsgSize(h.MaxRecvMsgSize),
 	}
 
 	// start the gRPC endpoint
