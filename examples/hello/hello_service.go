@@ -20,8 +20,15 @@ func NewService() *Service {
 
 // Hello will return a personalized greeting.
 func (s *Service) Hello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
+	// create greeting
+	greeting := "Hello!"
+	if in.Name != "" {
+		greeting = fmt.Sprintf("Hello %v!", in.Name)
+	}
+
+	// return response
 	return &pb.HelloResponse{
-		Greeting: fmt.Sprintf("Hello %v!", in.Name),
+		Greeting: greeting,
 	}, nil
 }
 
