@@ -2,6 +2,7 @@ package gohost
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -15,6 +16,14 @@ import (
 
 // ServeGRPC starts a gRPC endpoint for the given service.
 func ServeGRPC(service GRPCService, grpcAddr string, opts []grpc.ServerOption) error {
+	// validate parameters
+	if service == nil {
+		return errors.New("service cannot be nil")
+	}
+	if grpcAddr == "" {
+		return errors.New("grpcAddr cannot be empty")
+	}
+
 	// start listening
 	lis, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
