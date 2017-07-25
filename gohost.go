@@ -21,7 +21,7 @@ func ServeGRPC(service GRPCService, grpcAddr string, opts []grpc.ServerOption) e
 		return errors.New("service cannot be nil")
 	}
 	if grpcAddr == "" {
-		return errors.New("grpcAddr cannot be empty")
+		return errors.New("grpc address cannot be empty")
 	}
 
 	// start listening
@@ -44,6 +44,14 @@ func ServeGRPC(service GRPCService, grpcAddr string, opts []grpc.ServerOption) e
 
 // ServeGRPCWithTLS starts a gRPC endpoint for the given service with TLS enabled.
 func ServeGRPCWithTLS(service GRPCService, grpcAddr string, opts []grpc.ServerOption, certFile string, keyFile string) error {
+	// validate parameters
+	if certFile == "" {
+		return errors.New("cert file cannot be empty")
+	}
+	if keyFile == "" {
+		return errors.New("key file cannot be empty")
+	}
+
 	// create TLS credentials
 	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 	if err != nil {
@@ -70,6 +78,14 @@ func ServeHTTP(service HTTPService, httpAddr string, grpcAddr string, enableCORS
 
 // ServeHTTPWithTLS starts an HTTP endpoint for a given service with TLS enabled. This is a gateway pointing to a gRPC endpoint.
 func ServeHTTPWithTLS(service HTTPService, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, certFile string, keyFile string, insecureSkipVerify bool) error {
+	// validate parameters
+	if certFile == "" {
+		return errors.New("cert file cannot be empty")
+	}
+	if keyFile == "" {
+		return errors.New("key file cannot be empty")
+	}
+
 	// create TLS credentials
 	creds := credentials.NewTLS(&tls.Config{
 		InsecureSkipVerify: insecureSkipVerify,
@@ -86,6 +102,17 @@ func ServeHTTPWithTLS(service HTTPService, httpAddr string, grpcAddr string, ena
 
 // serveHTTPInternal is an internal method for serving up an HTTP endpoint.
 func serveHTTPInternal(service HTTPService, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, listenAndServe func(addr string, handler http.Handler) error) error {
+	// validate parameters
+	if service == nil {
+		return errors.New("service cannot be nil")
+	}
+	if httpAddr == "" {
+		return errors.New("http address cannot be empty")
+	}
+	if grpcAddr == "" {
+		return errors.New("grpc address cannot be empty")
+	}
+
 	// create context
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
