@@ -2,11 +2,41 @@ package gohost
 
 import (
 	"testing"
+	"time"
 
 	"github.com/eleniums/gohost/examples/hello"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 
+	pb "github.com/eleniums/gohost/examples/hello/proto"
 	assert "github.com/stretchr/testify/require"
 )
+
+func Test_ServeGRPC_Successful(t *testing.T) {
+	// arrange
+	service := hello.NewService()
+	grpcAddr := "127.0.0.1:50051"
+
+	// act - start the service
+	go ServeGRPC(service, grpcAddr, nil)
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	assert.NoError(t, err)
+	client := pb.NewHelloServiceClient(conn)
+	req := pb.HelloRequest{
+		Name: "eleniums",
+	}
+	resp, err := client.Hello(context.Background(), &req)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, "Hello eleniums!", resp.Greeting)
+}
 
 func Test_ServeGRPC_NilService(t *testing.T) {
 	// arrange
