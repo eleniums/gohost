@@ -135,17 +135,17 @@ func Test_ServeHTTP_Successful(t *testing.T) {
 	}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/hello?name=eleniums", httpAddr), nil)
 	assert.NoError(t, err)
-	resp, err := httpClient.Do(req)
+	doResp, err := httpClient.Do(req)
 	assert.NoError(t, err)
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(doResp.Body)
 	assert.NoError(t, err)
-	greeting := pb.HelloResponse{}
-	err = json.Unmarshal(body, &greeting)
+	resp := pb.HelloResponse{}
+	err = json.Unmarshal(body, &resp)
 
 	// assert
 	assert.NoError(t, err)
-	assert.NotNil(t, greeting)
-	assert.Equal(t, "Hello eleniums!", greeting.Greeting)
+	assert.NotNil(t, resp)
+	assert.Equal(t, "Hello eleniums!", resp.Greeting)
 }
 
 func Test_ServeHTTP_NilService(t *testing.T) {
