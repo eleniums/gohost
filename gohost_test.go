@@ -1,6 +1,9 @@
 package gohost
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
 	"testing"
 	"time"
 
@@ -110,6 +113,38 @@ func Test_ServeGRPCWithTLS_EmptyKeyFile(t *testing.T) {
 
 	// assert
 	assert.Error(t, err)
+}
+
+func Test_ServeHTTP_Successful(t *testing.T) {
+	// arrange
+	service := hello.NewService()
+	httpAddr := "127.0.0.1:9090"
+	grpcAddr := "127.0.0.1:50051"
+
+	// act - start the service
+	go ServeGRPC(service, grpcAddr, nil)
+	go ServeHTTP(service, httpAddr, grpcAddr, false, nil)
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service
+	httpClient := http.Client{
+		Timeout: time.Millisecond * 500,
+	}
+	req, err := http.NewRequest(http.MethodGet, "http://"+httpAddr+"/v1/hello?name=eleniums", nil)
+	assert.NoError(t, err)
+	resp, err := httpClient.Do(req)
+	assert.NoError(t, err)
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	greeting := pb.HelloResponse{}
+	err = json.Unmarshal(body, &greeting)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, greeting)
+	assert.Equal(t, "Hello eleniums!", greeting.Greeting)
 }
 
 func Test_ServeHTTP_NilService(t *testing.T) {
