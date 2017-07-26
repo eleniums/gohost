@@ -2,6 +2,7 @@ package gohost
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -132,7 +133,7 @@ func Test_ServeHTTP_Successful(t *testing.T) {
 	httpClient := http.Client{
 		Timeout: time.Millisecond * 500,
 	}
-	req, err := http.NewRequest(http.MethodGet, "http://"+httpAddr+"/v1/hello?name=eleniums", nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/hello?name=eleniums", httpAddr), nil)
 	assert.NoError(t, err)
 	resp, err := httpClient.Do(req)
 	assert.NoError(t, err)
