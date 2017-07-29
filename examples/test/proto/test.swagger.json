@@ -43,7 +43,7 @@
     },
     "/v1/large": {
       "get": {
-        "summary": "Large will send a large response message.",
+        "summary": "Large will return a large response message.",
         "operationId": "Large",
         "responses": {
           "200": {
@@ -69,7 +69,7 @@
       }
     },
     "/v1/send": {
-      "get": {
+      "post": {
         "summary": "Send the value in the request.",
         "operationId": "Send",
         "responses": {
@@ -80,15 +80,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "value",
-            "description": "Value to send.",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
         "tags": [
           "TestService"
         ]

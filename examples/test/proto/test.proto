@@ -6,13 +6,6 @@ import "google/api/annotations.proto";
 
 // A sample service used for testing.
 service TestService {
-  // Send the value in the request.
-  rpc Send(SendRequest) returns (TestResponse) {
-      option (google.api.http) = {
-        get: "/v1/send"
-    };
-  }
-
   // Echo the value in the request back in the response.
   rpc Echo(SendRequest) returns (EchoResponse) {
       option (google.api.http) = {
@@ -20,7 +13,14 @@ service TestService {
     };
   }
 
-  // Large will send a large response message.
+  // Send the value in the request.
+  rpc Send(SendRequest) returns (TestResponse) {
+      option (google.api.http) = {
+        post: "/v1/send"
+    };
+  }
+
+  // Large will return a large response message.
   rpc Large(LargeRequest) returns (EchoResponse) {
       option (google.api.http) = {
         get: "/v1/large"
