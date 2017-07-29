@@ -16,14 +16,12 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
-func Test_Hoster_ListenAndServe_Successful(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	// arrange
 	service := hello.NewService()
-	httpAddr := "127.0.0.1:9090"
 	grpcAddr := "127.0.0.1:50051"
 
 	hoster := NewHoster(service, grpcAddr)
-	hoster.HTTPAddr = httpAddr
 
 	// act - start the service
 	go hoster.ListenAndServe()
@@ -44,6 +42,22 @@ func Test_Hoster_ListenAndServe_Successful(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, grpcResp)
 	assert.Equal(t, "Hello eleniums!", grpcResp.Greeting)
+}
+
+func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
+	// arrange
+	service := hello.NewService()
+	httpAddr := "127.0.0.1:9090"
+	grpcAddr := "127.0.0.1:50051"
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.HTTPAddr = httpAddr
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
 
 	// call the service at the HTTP endpoint
 	httpClient := http.Client{
