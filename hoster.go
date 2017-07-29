@@ -2,6 +2,7 @@ package gohost
 
 import (
 	"errors"
+	"math"
 
 	"google.golang.org/grpc"
 )
@@ -58,7 +59,7 @@ func (h *Hoster) ListenAndServe() error {
 
 		// configure dial options
 		dialOpts := []grpc.DialOption{
-			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(h.MaxSendMsgSize), grpc.MaxCallRecvMsgSize(h.MaxRecvMsgSize)),
+			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
 		}
 
 		// start the HTTP endpoint

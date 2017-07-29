@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -30,6 +31,8 @@ func main() {
 		Name: *name,
 	}
 
+	start := time.Now()
+
 	// call the hello function on the server
 	response, err := client.Hello(context.Background(), &request)
 	if err != nil {
@@ -37,5 +40,5 @@ func main() {
 	}
 
 	// display server response
-	log.Printf("Server response: %v", response.Greeting)
+	log.Printf("Server response in %v: %v", time.Since(start), response.Greeting)
 }

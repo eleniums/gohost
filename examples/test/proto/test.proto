@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package test;
+
+import "google/api/annotations.proto";
+
+// A sample service used for testing.
+service TestService {
+  // Echo the value in the request back in the response.
+  rpc Echo(SendRequest) returns (EchoResponse) {
+      option (google.api.http) = {
+        get: "/v1/echo"
+    };
+  }
+
+  // Send the value in the request.
+  rpc Send(SendRequest) returns (TestResponse) {
+      option (google.api.http) = {
+        post: "/v1/send"
+    };
+  }
+
+  // Large will return a large response message.
+  rpc Large(LargeRequest) returns (EchoResponse) {
+      option (google.api.http) = {
+        get: "/v1/large"
+    };
+  }
+}
+
+// Send request.
+message SendRequest {
+  // Value to send.
+  string value = 1;
+}
+
+// Large request.
+message LargeRequest {
+  // Length of string to return in response.
+  int64 length = 1;
+}
+
+// Test response.
+message TestResponse {
+  // True if operation was a success.
+  bool success = 1;
+}
+
+// Echo response.
+message EchoResponse {
+  // Echo from service.
+  string echo = 1;
+}

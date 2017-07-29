@@ -1,0 +1,133 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "proto/test.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/echo": {
+      "get": {
+        "summary": "Echo the value in the request back in the response.",
+        "operationId": "Echo",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/testEchoResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "description": "Value to send.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TestService"
+        ]
+      }
+    },
+    "/v1/large": {
+      "get": {
+        "summary": "Large will return a large response message.",
+        "operationId": "Large",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/testEchoResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "length",
+            "description": "Length of string to return in response.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "TestService"
+        ]
+      }
+    },
+    "/v1/send": {
+      "post": {
+        "summary": "Send the value in the request.",
+        "operationId": "Send",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/testTestResponse"
+            }
+          }
+        },
+        "tags": [
+          "TestService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "testEchoResponse": {
+      "type": "object",
+      "properties": {
+        "echo": {
+          "type": "string",
+          "description": "Echo from service."
+        }
+      },
+      "description": "Echo response."
+    },
+    "testLargeRequest": {
+      "type": "object",
+      "properties": {
+        "length": {
+          "type": "string",
+          "format": "int64",
+          "description": "Length of string to return in response."
+        }
+      },
+      "description": "Large request."
+    },
+    "testSendRequest": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Value to send."
+        }
+      },
+      "description": "Send request."
+    },
+    "testTestResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "True if operation was a success."
+        }
+      },
+      "description": "Test response."
+    }
+  }
+}
