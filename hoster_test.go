@@ -1,9 +1,11 @@
 package gohost
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -21,6 +23,8 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	service := test.NewService()
 	grpcAddr := "127.0.0.1:50051"
 
+	expectedValue := "test"
+
 	hoster := NewHoster(service, grpcAddr)
 
 	// act - start the service
@@ -34,21 +38,23 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	assert.NoError(t, err)
 	client := pb.NewTestServiceClient(conn)
 	grpcReq := pb.SendRequest{
-		Value: "test",
+		Value: expectedValue,
 	}
-	grpcResp, err := client.Send(context.Background(), &grpcReq)
+	grpcResp, err := client.Echo(context.Background(), &grpcReq)
 
 	// assert
 	assert.NoError(t, err)
 	assert.NotNil(t, grpcResp)
-	assert.True(t, grpcResp.Success)
+	assert.Equal(t, expectedValue, grpcResp.Echo)
 }
 
 func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := "127.0.0.1:50052"
+
+	expectedValue := "test"
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.HTTPAddr = httpAddr
@@ -63,9 +69,112 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	httpClient := http.Client{
 		Timeout: time.Millisecond * 500,
 	}
-	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/send?value=test", httpAddr), nil)
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value="+expectedValue, httpAddr), nil)
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(httpReq)
+	assert.NoError(t, err)
+	body, err := ioutil.ReadAll(doResp.Body)
+	assert.NoError(t, err)
+	httpResp := pb.EchoResponse{}
+	err = json.Unmarshal(body, &httpResp)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, httpResp)
+	assert.Equal(t, expectedValue, httpResp.Echo)
+}
+
+func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	grpcAddr := "127.0.0.1:50053"
+
+	largeValue := string(make([]byte, 10000000))
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.MaxRecvMsgSize = math.MaxInt32
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service at the gRPC endpoint
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	assert.NoError(t, err)
+	client := pb.NewTestServiceClient(conn)
+	grpcReq := pb.SendRequest{
+		Value: largeValue,
+	}
+	grpcResp, err := client.Send(context.Background(), &grpcReq, grpc.MaxCallSendMsgSize(math.MaxInt32))
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, grpcResp)
+	assert.True(t, grpcResp.Success)
+}
+
+func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	grpcAddr := "127.0.0.1:50054"
+
+	largeValue := string(make([]byte, 10000000))
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.MaxRecvMsgSize = 1
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service at the gRPC endpoint
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	assert.NoError(t, err)
+	client := pb.NewTestServiceClient(conn)
+	grpcReq := pb.SendRequest{
+		Value: largeValue,
+	}
+	grpcResp, err := client.Send(context.Background(), &grpcReq, grpc.MaxCallSendMsgSize(math.MaxInt32))
+
+	// assert
+	assert.Error(t, err)
+	assert.Nil(t, grpcResp)
+}
+
+func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	httpAddr := "127.0.0.1:9090"
+	grpcAddr := "127.0.0.1:50055"
+
+	largeValue := string(make([]byte, 10000000))
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.HTTPAddr = httpAddr
+	hoster.MaxRecvMsgSize = math.MaxInt32
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service at the HTTP endpoint
+	httpClient := http.Client{
+		Timeout: time.Millisecond * 500,
+	}
+	httpReq := pb.SendRequest{
+		Value: largeValue,
+	}
+	payload, err := json.Marshal(&httpReq)
+	assert.NoError(t, err)
+	postReq, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v/v1/send", httpAddr), bytes.NewBuffer(payload))
+	assert.NoError(t, err)
+	doResp, err := httpClient.Do(postReq)
 	assert.NoError(t, err)
 	body, err := ioutil.ReadAll(doResp.Body)
 	assert.NoError(t, err)
@@ -74,6 +183,48 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 
 	// assert
 	assert.NoError(t, err)
+	assert.NotNil(t, httpResp)
+	assert.True(t, httpResp.Success)
+}
+
+func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Fail(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	httpAddr := "127.0.0.1:9090"
+	grpcAddr := "127.0.0.1:50056"
+
+	largeValue := string(make([]byte, 10000000))
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.HTTPAddr = httpAddr
+	hoster.MaxRecvMsgSize = 1
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service at the HTTP endpoint
+	httpClient := http.Client{
+		Timeout: time.Millisecond * 500,
+	}
+	httpReq := pb.SendRequest{
+		Value: largeValue,
+	}
+	payload, err := json.Marshal(&httpReq)
+	assert.NoError(t, err)
+	postReq, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v/v1/send", httpAddr), bytes.NewBuffer(payload))
+	assert.NoError(t, err)
+	doResp, err := httpClient.Do(postReq)
+	assert.NoError(t, err)
+	body, err := ioutil.ReadAll(doResp.Body)
+	assert.NoError(t, err)
+	httpResp := pb.TestResponse{}
+	err = json.Unmarshal(body, &httpResp)
+
+	// assert
+	assert.Error(t, err)
 	assert.NotNil(t, httpResp)
 	assert.True(t, httpResp.Success)
 }
