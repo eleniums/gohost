@@ -141,6 +141,7 @@ func Test_ServeHTTP_Successful(t *testing.T) {
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(req)
 	assert.NoError(t, err)
+	assert.Equal(t, 200, doResp.StatusCode)
 	body, err := ioutil.ReadAll(doResp.Body)
 	assert.NoError(t, err)
 	resp := pb.EchoResponse{}
