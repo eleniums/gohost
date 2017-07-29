@@ -18,6 +18,10 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
+const (
+	largeMessageLength = 10000000
+)
+
 func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	// arrange
 	service := test.NewService()
@@ -89,7 +93,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 	service := test.NewService()
 	grpcAddr := "127.0.0.1:50053"
 
-	largeValue := string(make([]byte, 10000000))
+	largeValue := string(make([]byte, largeMessageLength))
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.MaxRecvMsgSize = math.MaxInt32
@@ -120,7 +124,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
 	service := test.NewService()
 	grpcAddr := "127.0.0.1:50054"
 
-	largeValue := string(make([]byte, 10000000))
+	largeValue := string(make([]byte, largeMessageLength))
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.MaxRecvMsgSize = 1
@@ -151,11 +155,10 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
 	httpAddr := "127.0.0.1:9090"
 	grpcAddr := "127.0.0.1:50055"
 
-	largeValue := string(make([]byte, 10000000))
+	largeValue := string(make([]byte, largeMessageLength))
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.HTTPAddr = httpAddr
-	hoster.MaxRecvMsgSize = math.MaxInt32
 
 	// act - start the service
 	go hoster.ListenAndServe()
@@ -183,48 +186,6 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
 
 	// assert
 	assert.NoError(t, err)
-	assert.NotNil(t, httpResp)
-	assert.True(t, httpResp.Success)
-}
-
-func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Fail(t *testing.T) {
-	// arrange
-	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50056"
-
-	largeValue := string(make([]byte, 10000000))
-
-	hoster := NewHoster(service, grpcAddr)
-	hoster.HTTPAddr = httpAddr
-	hoster.MaxRecvMsgSize = 1
-
-	// act - start the service
-	go hoster.ListenAndServe()
-
-	// make sure service has time to start
-	time.Sleep(time.Millisecond * 100)
-
-	// call the service at the HTTP endpoint
-	httpClient := http.Client{
-		Timeout: time.Millisecond * 500,
-	}
-	httpReq := pb.SendRequest{
-		Value: largeValue,
-	}
-	payload, err := json.Marshal(&httpReq)
-	assert.NoError(t, err)
-	postReq, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v/v1/send", httpAddr), bytes.NewBuffer(payload))
-	assert.NoError(t, err)
-	doResp, err := httpClient.Do(postReq)
-	assert.NoError(t, err)
-	body, err := ioutil.ReadAll(doResp.Body)
-	assert.NoError(t, err)
-	httpResp := pb.TestResponse{}
-	err = json.Unmarshal(body, &httpResp)
-
-	// assert
-	assert.Error(t, err)
 	assert.NotNil(t, httpResp)
 	assert.True(t, httpResp.Success)
 }
