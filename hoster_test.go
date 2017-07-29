@@ -25,7 +25,7 @@ const (
 func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 
 	expectedValue := "test"
 
@@ -55,8 +55,8 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50052"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 
 	expectedValue := "test"
 
@@ -91,7 +91,7 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50053"
+	grpcAddr := getAddr(t)
 
 	largeValue := string(make([]byte, largeMessageLength))
 
@@ -122,7 +122,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50054"
+	grpcAddr := getAddr(t)
 
 	largeValue := string(make([]byte, largeMessageLength))
 
@@ -152,8 +152,8 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
 func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50055"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 
 	largeValue := string(make([]byte, largeMessageLength))
 
@@ -194,7 +194,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
 func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50056"
+	grpcAddr := getAddr(t)
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.MaxSendMsgSize = math.MaxInt32
@@ -223,7 +223,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Pass(t *testing.T) {
 func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Fail(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50057"
+	grpcAddr := getAddr(t)
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.MaxSendMsgSize = 1
@@ -251,8 +251,8 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Fail(t *testing.T) {
 func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9091"
-	grpcAddr := "127.0.0.1:50058"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.HTTPAddr = httpAddr
@@ -287,8 +287,8 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Pass(t *testing.T) {
 func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Fail(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9092"
-	grpcAddr := "127.0.0.1:50059"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 
 	hoster := NewHoster(service, grpcAddr)
 	hoster.HTTPAddr = httpAddr

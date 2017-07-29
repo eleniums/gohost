@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"testing"
 	"time"
@@ -19,7 +20,7 @@ import (
 func Test_ServeGRPC_Successful(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 
 	expectedValue := "test"
 
@@ -46,7 +47,7 @@ func Test_ServeGRPC_Successful(t *testing.T) {
 
 func Test_ServeGRPC_NilService(t *testing.T) {
 	// arrange
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 
 	// act
 	err := ServeGRPC(nil, grpcAddr, nil)
@@ -68,7 +69,7 @@ func Test_ServeGRPC_EmptyGRPCAddress(t *testing.T) {
 
 func Test_ServeGRPCWithTLS_NilService(t *testing.T) {
 	// arrange
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 	certFile := "certfile"
 	keyFile := "keyfile"
 
@@ -95,7 +96,7 @@ func Test_ServeGRPCWithTLS_EmptyGRPCAddress(t *testing.T) {
 func Test_ServeGRPCWithTLS_EmptyCertFile(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 	keyFile := "keyfile"
 
 	// act
@@ -108,7 +109,7 @@ func Test_ServeGRPCWithTLS_EmptyCertFile(t *testing.T) {
 func Test_ServeGRPCWithTLS_EmptyKeyFile(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 	certFile := "certfile"
 
 	// act
@@ -121,8 +122,8 @@ func Test_ServeGRPCWithTLS_EmptyKeyFile(t *testing.T) {
 func Test_ServeHTTP_Successful(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50051"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 
 	expectedValue := "test"
 
@@ -155,8 +156,8 @@ func Test_ServeHTTP_Successful(t *testing.T) {
 
 func Test_ServeHTTP_NilService(t *testing.T) {
 	// arrange
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50051"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 
 	// act
 	err := ServeHTTP(nil, httpAddr, grpcAddr, false, nil)
@@ -168,7 +169,7 @@ func Test_ServeHTTP_NilService(t *testing.T) {
 func Test_ServeHTTP_EmptyHTTPAddress(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 
 	// act
 	err := ServeHTTP(service, "", grpcAddr, false, nil)
@@ -180,7 +181,7 @@ func Test_ServeHTTP_EmptyHTTPAddress(t *testing.T) {
 func Test_ServeHTTP_EmptyGRPCAddress(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
+	httpAddr := getAddr(t)
 
 	// act
 	err := ServeHTTP(service, httpAddr, "", false, nil)
@@ -191,8 +192,8 @@ func Test_ServeHTTP_EmptyGRPCAddress(t *testing.T) {
 
 func Test_ServeHTTPWithTLS_NilService(t *testing.T) {
 	// arrange
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50051"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 	certFile := "certfile"
 	keyFile := "keyfile"
 
@@ -206,7 +207,7 @@ func Test_ServeHTTPWithTLS_NilService(t *testing.T) {
 func Test_ServeHTTPWithTLS_EmptyHTTPAddress(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	grpcAddr := "127.0.0.1:50051"
+	grpcAddr := getAddr(t)
 	certFile := "certfile"
 	keyFile := "keyfile"
 
@@ -220,7 +221,7 @@ func Test_ServeHTTPWithTLS_EmptyHTTPAddress(t *testing.T) {
 func Test_ServeHTTPWithTLS_EmptyGRPCAddress(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
+	httpAddr := getAddr(t)
 	certFile := "certfile"
 	keyFile := "keyfile"
 
@@ -234,8 +235,8 @@ func Test_ServeHTTPWithTLS_EmptyGRPCAddress(t *testing.T) {
 func Test_ServeHTTPWithTLS_EmptyCertFile(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50051"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 	keyFile := "keyfile"
 
 	// act
@@ -248,8 +249,8 @@ func Test_ServeHTTPWithTLS_EmptyCertFile(t *testing.T) {
 func Test_ServeHTTPWithTLS_EmptyKeyFile(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	httpAddr := "127.0.0.1:9090"
-	grpcAddr := "127.0.0.1:50051"
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 	certFile := "certfile"
 
 	// act
@@ -257,4 +258,13 @@ func Test_ServeHTTPWithTLS_EmptyKeyFile(t *testing.T) {
 
 	// assert
 	assert.Error(t, err)
+}
+
+// getAddr is a helper function that will retrieve a 127.0.0.1 address with an open port.
+func getAddr(t *testing.T) string {
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	assert.NoError(t, err)
+	defer lis.Close()
+
+	return lis.Addr().String()
 }
