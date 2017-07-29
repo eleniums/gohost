@@ -8,17 +8,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eleniums/gohost/examples/hello"
+	"github.com/eleniums/gohost/examples/test"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pb "github.com/eleniums/gohost/examples/hello/proto"
+	pb "github.com/eleniums/gohost/examples/test/proto"
 	assert "github.com/stretchr/testify/require"
 )
 
 func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	grpcAddr := "127.0.0.1:50051"
 
 	hoster := NewHoster(service, grpcAddr)
@@ -32,21 +32,21 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
 	assert.NoError(t, err)
-	client := pb.NewHelloServiceClient(conn)
-	grpcReq := pb.HelloRequest{
-		Name: "eleniums",
+	client := pb.NewTestServiceClient(conn)
+	grpcReq := pb.SendRequest{
+		Value: "test",
 	}
-	grpcResp, err := client.Hello(context.Background(), &grpcReq)
+	grpcResp, err := client.Send(context.Background(), &grpcReq)
 
 	// assert
 	assert.NoError(t, err)
 	assert.NotNil(t, grpcResp)
-	assert.Equal(t, "Hello eleniums!", grpcResp.Greeting)
+	assert.True(t, grpcResp.Success)
 }
 
 func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	httpAddr := "127.0.0.1:9090"
 	grpcAddr := "127.0.0.1:50051"
 
@@ -63,17 +63,17 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	httpClient := http.Client{
 		Timeout: time.Millisecond * 500,
 	}
-	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/hello?name=eleniums", httpAddr), nil)
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/send?value=test", httpAddr), nil)
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(httpReq)
 	assert.NoError(t, err)
 	body, err := ioutil.ReadAll(doResp.Body)
 	assert.NoError(t, err)
-	httpResp := pb.HelloResponse{}
+	httpResp := pb.TestResponse{}
 	err = json.Unmarshal(body, &httpResp)
 
 	// assert
 	assert.NoError(t, err)
 	assert.NotNil(t, httpResp)
-	assert.Equal(t, "Hello eleniums!", httpResp.Greeting)
+	assert.True(t, httpResp.Success)
 }

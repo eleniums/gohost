@@ -8,18 +8,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eleniums/gohost/examples/hello"
+	"github.com/eleniums/gohost/examples/test"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pb "github.com/eleniums/gohost/examples/hello/proto"
+	pb "github.com/eleniums/gohost/examples/test/proto"
 	assert "github.com/stretchr/testify/require"
 )
 
 func Test_ServeGRPC_Successful(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	grpcAddr := "127.0.0.1:50051"
+
+	expectedValue := "test"
 
 	// act - start the service
 	go ServeGRPC(service, grpcAddr, nil)
@@ -30,16 +32,16 @@ func Test_ServeGRPC_Successful(t *testing.T) {
 	// call the service
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
 	assert.NoError(t, err)
-	client := pb.NewHelloServiceClient(conn)
-	req := pb.HelloRequest{
-		Name: "eleniums",
+	client := pb.NewTestServiceClient(conn)
+	req := pb.SendRequest{
+		Value: expectedValue,
 	}
-	resp, err := client.Hello(context.Background(), &req)
+	resp, err := client.Echo(context.Background(), &req)
 
 	// assert
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.Equal(t, "Hello eleniums!", resp.Greeting)
+	assert.Equal(t, expectedValue, resp.Echo)
 }
 
 func Test_ServeGRPC_NilService(t *testing.T) {
@@ -55,7 +57,7 @@ func Test_ServeGRPC_NilService(t *testing.T) {
 
 func Test_ServeGRPC_EmptyGRPCAddress(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 
 	// act
 	err := ServeGRPC(service, "", nil)
@@ -79,7 +81,7 @@ func Test_ServeGRPCWithTLS_NilService(t *testing.T) {
 
 func Test_ServeGRPCWithTLS_EmptyGRPCAddress(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	certFile := "certfile"
 	keyFile := "keyfile"
 
@@ -92,7 +94,7 @@ func Test_ServeGRPCWithTLS_EmptyGRPCAddress(t *testing.T) {
 
 func Test_ServeGRPCWithTLS_EmptyCertFile(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	grpcAddr := "127.0.0.1:50051"
 	keyFile := "keyfile"
 
@@ -105,7 +107,7 @@ func Test_ServeGRPCWithTLS_EmptyCertFile(t *testing.T) {
 
 func Test_ServeGRPCWithTLS_EmptyKeyFile(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	grpcAddr := "127.0.0.1:50051"
 	certFile := "certfile"
 
@@ -118,9 +120,11 @@ func Test_ServeGRPCWithTLS_EmptyKeyFile(t *testing.T) {
 
 func Test_ServeHTTP_Successful(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	httpAddr := "127.0.0.1:9090"
 	grpcAddr := "127.0.0.1:50051"
+
+	expectedValue := "test"
 
 	// act - start the service
 	go ServeGRPC(service, grpcAddr, nil)
@@ -133,19 +137,19 @@ func Test_ServeHTTP_Successful(t *testing.T) {
 	httpClient := http.Client{
 		Timeout: time.Millisecond * 500,
 	}
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/hello?name=eleniums", httpAddr), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value="+expectedValue, httpAddr), nil)
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(req)
 	assert.NoError(t, err)
 	body, err := ioutil.ReadAll(doResp.Body)
 	assert.NoError(t, err)
-	resp := pb.HelloResponse{}
+	resp := pb.EchoResponse{}
 	err = json.Unmarshal(body, &resp)
 
 	// assert
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.Equal(t, "Hello eleniums!", resp.Greeting)
+	assert.Equal(t, expectedValue, resp.Echo)
 }
 
 func Test_ServeHTTP_NilService(t *testing.T) {
@@ -162,7 +166,7 @@ func Test_ServeHTTP_NilService(t *testing.T) {
 
 func Test_ServeHTTP_EmptyHTTPAddress(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	grpcAddr := "127.0.0.1:50051"
 
 	// act
@@ -174,7 +178,7 @@ func Test_ServeHTTP_EmptyHTTPAddress(t *testing.T) {
 
 func Test_ServeHTTP_EmptyGRPCAddress(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	httpAddr := "127.0.0.1:9090"
 
 	// act
@@ -200,7 +204,7 @@ func Test_ServeHTTPWithTLS_NilService(t *testing.T) {
 
 func Test_ServeHTTPWithTLS_EmptyHTTPAddress(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	grpcAddr := "127.0.0.1:50051"
 	certFile := "certfile"
 	keyFile := "keyfile"
@@ -214,7 +218,7 @@ func Test_ServeHTTPWithTLS_EmptyHTTPAddress(t *testing.T) {
 
 func Test_ServeHTTPWithTLS_EmptyGRPCAddress(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	httpAddr := "127.0.0.1:9090"
 	certFile := "certfile"
 	keyFile := "keyfile"
@@ -228,7 +232,7 @@ func Test_ServeHTTPWithTLS_EmptyGRPCAddress(t *testing.T) {
 
 func Test_ServeHTTPWithTLS_EmptyCertFile(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	httpAddr := "127.0.0.1:9090"
 	grpcAddr := "127.0.0.1:50051"
 	keyFile := "keyfile"
@@ -242,7 +246,7 @@ func Test_ServeHTTPWithTLS_EmptyCertFile(t *testing.T) {
 
 func Test_ServeHTTPWithTLS_EmptyKeyFile(t *testing.T) {
 	// arrange
-	service := hello.NewService()
+	service := test.NewService()
 	httpAddr := "127.0.0.1:9090"
 	grpcAddr := "127.0.0.1:50051"
 	certFile := "certfile"
