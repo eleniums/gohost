@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	largeMessageLength = 10000000
+	largeMessageLength = 1000
 )
 
 func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
