@@ -2,6 +2,7 @@ package gohost
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +14,7 @@ import (
 	"github.com/eleniums/gohost/examples/test"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	pb "github.com/eleniums/gohost/examples/test/proto"
 	assert "github.com/stretchr/testify/require"
@@ -52,6 +54,38 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	assert.Equal(t, expectedValue, grpcResp.Echo)
 }
 
+func Test_Hoster_ListenAndServe_GRPCEndpoint_WithTLS(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	grpcAddr := getAddr(t)
+
+	expectedValue := "test"
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.CertFile = "./testdata/test.crt"
+	hoster.KeyFile = "./testdata/test.key"
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service at the gRPC endpoint
+	conn, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})))
+	assert.NoError(t, err)
+	client := pb.NewTestServiceClient(conn)
+	grpcReq := pb.SendRequest{
+		Value: expectedValue,
+	}
+	grpcResp, err := client.Echo(context.Background(), &grpcReq)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, grpcResp)
+	assert.Equal(t, expectedValue, grpcResp.Echo)
+}
+
 func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	// arrange
 	service := test.NewService()
@@ -74,6 +108,50 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 		Timeout: time.Millisecond * 500,
 	}
 	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value="+expectedValue, httpAddr), nil)
+	assert.NoError(t, err)
+	doResp, err := httpClient.Do(httpReq)
+	assert.NoError(t, err)
+	body, err := ioutil.ReadAll(doResp.Body)
+	assert.NoError(t, err)
+	httpResp := pb.EchoResponse{}
+	err = json.Unmarshal(body, &httpResp)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, httpResp)
+	assert.Equal(t, expectedValue, httpResp.Echo)
+}
+
+func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
+
+	expectedValue := "test"
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.HTTPAddr = httpAddr
+	hoster.CertFile = "./testdata/test.crt"
+	hoster.KeyFile = "./testdata/test.key"
+	hoster.InsecureSkipVerify = true
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service at the HTTP endpoint
+	httpClient := http.Client{
+		Timeout: time.Millisecond * 500,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://%v/v1/echo?value="+expectedValue, httpAddr), nil)
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(httpReq)
 	assert.NoError(t, err)
