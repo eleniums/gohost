@@ -2,6 +2,7 @@ package hello
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
@@ -25,6 +26,8 @@ func (s *Service) Hello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResp
 	if in.Name != "" {
 		greeting = fmt.Sprintf("Hello %v!", in.Name)
 	}
+
+	log.Printf("Received request from: %v", in.Name)
 
 	// return response
 	return &pb.HelloResponse{
