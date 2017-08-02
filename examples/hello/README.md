@@ -19,10 +19,21 @@
     - protoc -I ./ -I ../../../../../github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --proto_path=./proto --swagger_out=logtostderr=true:. proto/hello.proto
 
 # Run the server
-go run cmd/server/main.go
+- Insecure
+    - go run cmd/server/main.go
+- With TLS
+    - go run cmd/server/main.go -cert-file ../../testdata/test.crt -key-file ../../testdata/test.key -insecure-skip-verify
+
+NOTE: insecure-skip-verify is only used for testing when the host name does not need to be verified and should not be used in production
 
 # Test with the command line client
-go run cmd/cli/main.go -name <yournamehere>
+- Insecure
+    - go run cmd/cli/main.go -insecure -name <yournamehere>
+- With TLS
+    - go run cmd/cli/main.go -insecure-skip-verify -name <yournamehere>
 
 # Test the HTTP endpoint
-curl 127.0.0.1:9090/v1/hello?name=<yournamehere>
+- Insecure
+    - curl 127.0.0.1:9090/v1/hello?name=<yournamehere>
+- With TLS
+    - curl --insecure https://127.0.0.1:9090/v1/hello?name=<yournamehere>
