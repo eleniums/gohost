@@ -1,6 +1,6 @@
 # Example Service: hello
 
-A simple example service that demonstrates how to use a Hoster instance to host a service with gRPC and REST endpoints.
+A simple example service that demonstrates how to use a Hoster instance to host a service with gRPC and HTTP endpoints.
 
 ## Prerequisites
 - Install [gRPC](https://grpc.io/docs/quickstart/go.html)
@@ -24,7 +24,7 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
 - With TLS
     - `go run cmd/cli/main.go -insecure-skip-verify -name eleniums`
 
-## Test the REST endpoint with curl
+## Test the HTTP endpoint with curl
 - Insecure
     - `curl 127.0.0.1:9090/v1/hello?name=eleniums`
 - With TLS
@@ -36,7 +36,7 @@ The stubs for this example have already been generated and checked in, so these 
 
 - Generate gRPC client/server stubs:
     - `protoc -I ./ -I ../../../../../github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --go_out=plugins=grpc:./ proto/hello.proto`
-- Generate RESTful reverse proxy:
+- Generate HTTP gateway:
     - `protoc -I ./ -I ../../../../../github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --grpc-gateway_out=logtostderr=true:. proto/hello.proto`
 - Generate Swagger definition:
     - `protoc -I ./ -I ../../../../../github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --proto_path=./proto --swagger_out=logtostderr=true:. proto/hello.proto`

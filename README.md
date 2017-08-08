@@ -21,7 +21,7 @@ dep ensure
 - Requires Go 1.6 or later
 - Uses [dep](https://github.com/golang/dep) for dependencies
 - Uses [grpc-go](https://github.com/grpc/grpc-go) for gRPC endpoints
-- Uses [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) for REST endpoints
+- Uses [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) for HTTP endpoints
 - See the full list of imported packages [here](https://godoc.org/github.com/eleniums/gohost?imports)
 
 ## Example
