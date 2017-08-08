@@ -6,14 +6,8 @@ A tool for hosting a Go service with gRPC and HTTP endpoints.
 
 ## Installation
 
-Add this package:
 ```
 go get github.com/eleniums/gohost
-```
-
-Retrieve all dependencies using [dep](https://github.com/golang/dep):
-```
-dep ensure
 ```
 
 ## Prerequisites
