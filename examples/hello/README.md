@@ -28,7 +28,7 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
 - Insecure
     - `curl 127.0.0.1:9090/v1/hello?name=eleniums`
 - With TLS
-    - `curl --insecure https://127.0.0.1:9090/v1/hello?name=eleniums`
+    - `curl -k https://127.0.0.1:9090/v1/hello?name=eleniums`
 
 ## Generate Stubs
 
