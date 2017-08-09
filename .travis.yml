@@ -8,4 +8,3 @@ go:
 
 script:
   - go test
-  - go test ./examples/hello
