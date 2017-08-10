@@ -163,6 +163,20 @@ func Test_ServeGRPCWithTLS_EmptyKeyFile(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func Test_ServeGRPCWithTLS_BadCertFile(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	grpcAddr := getAddr(t)
+	certFile := "./testdata/badcert.crt"
+	keyFile := "./testdata/test.key"
+
+	// act - start the service
+	err := ServeGRPCWithTLS(service, grpcAddr, nil, certFile, keyFile)
+
+	// assert
+	assert.Error(t, err)
+}
+
 func Test_ServeGRPCWithTLS_FailListen(t *testing.T) {
 	// arrange
 	service := test.NewService()
