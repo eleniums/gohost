@@ -8,7 +8,7 @@ import (
 	pb "github.com/eleniums/gohost/examples/test/proto"
 )
 
-// Service contains the implementation for the gRPC service.
+// Service contains the implementation for the gRPC service. It implements the interfaces for both gRPC and HTTP endpoints.
 type Service struct{}
 
 // NewService creates a new instance of Service.

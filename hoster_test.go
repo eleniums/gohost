@@ -226,6 +226,22 @@ func Test_Hoster_ListenAndServe_EmptyGRPCAddress(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func Test_Hoster_ListenAndServe_DoesNotImplementHTTPInterface(t *testing.T) {
+	// arrange
+	service := test.NewGRPCService()
+	grpcAddr := getAddr(t)
+	httpAddr := getAddr(t)
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.HTTPAddr = httpAddr
+
+	// act - start the service
+	err := hoster.ListenAndServe()
+
+	// assert
+	assert.Error(t, err)
+}
+
 func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
