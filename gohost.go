@@ -35,11 +35,7 @@ func ServeGRPC(service GRPCService, grpcAddr string, opts []grpc.ServerOption) e
 	service.RegisterServer(grpcServer)
 
 	// start server
-	if err := grpcServer.Serve(lis); err != nil {
-		return fmt.Errorf("failed to serve gRPC endpoint: %v", err)
-	}
-
-	return nil
+	return grpcServer.Serve(lis)
 }
 
 // ServeGRPCWithTLS starts a gRPC endpoint for the given service with TLS enabled.
@@ -55,7 +51,7 @@ func ServeGRPCWithTLS(service GRPCService, grpcAddr string, opts []grpc.ServerOp
 	// create TLS credentials
 	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 	if err != nil {
-		return fmt.Errorf("failed to generate TLS credentials: %v", err)
+		return fmt.Errorf("failed to load TLS credentials: %v", err)
 	}
 
 	// add TLS credentials to options
@@ -122,7 +118,7 @@ func serveHTTPInternal(service HTTPService, httpAddr string, grpcAddr string, en
 	mux := runtime.NewServeMux()
 	err := service.RegisterHandler(ctx, mux, grpcAddr, opts)
 	if err != nil {
-		return fmt.Errorf("failed to register HTTP endpoint: %v", err)
+		return fmt.Errorf("failed to register HTTP handler: %v", err)
 	}
 
 	// enable CORS if requested
@@ -132,10 +128,5 @@ func serveHTTPInternal(service HTTPService, httpAddr string, grpcAddr string, en
 	}
 
 	// start server
-	err = listenAndServe(httpAddr, handler)
-	if err != nil {
-		return fmt.Errorf("failed to serve HTTP endpoint: %v", err)
-	}
-
-	return nil
+	return listenAndServe(httpAddr, handler)
 }

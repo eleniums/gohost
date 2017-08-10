@@ -166,6 +166,82 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 	assert.Equal(t, expectedValue, httpResp.Echo)
 }
 
+func Test_Hoster_ListenAndServe_Logger(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	grpcAddr := getAddr(t)
+
+	expectedValue := "test"
+
+	hoster := NewHoster(service, grpcAddr)
+
+	loggedValue := ""
+	hoster.Logger = func(format string, v ...interface{}) {
+		loggedValue = fmt.Sprintf(format, v...)
+	}
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(time.Millisecond * 100)
+
+	// call the service at the gRPC endpoint
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	assert.NoError(t, err)
+	client := pb.NewTestServiceClient(conn)
+	grpcReq := pb.SendRequest{
+		Value: expectedValue,
+	}
+	_, err = client.Echo(context.Background(), &grpcReq)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, loggedValue)
+}
+
+func Test_Hoster_ListenAndServe_NilService(t *testing.T) {
+	// arrange
+	grpcAddr := getAddr(t)
+
+	hoster := NewHoster(nil, grpcAddr)
+
+	// act - start the service
+	err := hoster.ListenAndServe()
+
+	// assert
+	assert.Error(t, err)
+}
+
+func Test_Hoster_ListenAndServe_EmptyGRPCAddress(t *testing.T) {
+	// arrange
+	service := test.NewService()
+
+	hoster := NewHoster(service, "")
+
+	// act - start the service
+	err := hoster.ListenAndServe()
+
+	// assert
+	assert.Error(t, err)
+}
+
+func Test_Hoster_ListenAndServe_DoesNotImplementHTTPInterface(t *testing.T) {
+	// arrange
+	service := test.NewGRPCService()
+	grpcAddr := getAddr(t)
+	httpAddr := getAddr(t)
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.HTTPAddr = httpAddr
+
+	// act - start the service
+	err := hoster.ListenAndServe()
+
+	// assert
+	assert.Error(t, err)
+}
+
 func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
