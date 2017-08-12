@@ -30,7 +30,7 @@ func Test_ServeGRPC_Successful(t *testing.T) {
 	go ServeGRPC(service, grpcAddr, nil)
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * serviceStartDelay)
 
 	// call the service
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
@@ -94,7 +94,7 @@ func Test_ServeGRPCWithTLS_Successful(t *testing.T) {
 	go ServeGRPCWithTLS(service, grpcAddr, nil, certFile, keyFile)
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * serviceStartDelay)
 
 	// call the service
 	conn, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})))
@@ -204,11 +204,11 @@ func Test_ServeHTTP_Successful(t *testing.T) {
 	go ServeHTTP(service, httpAddr, grpcAddr, false, nil)
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * serviceStartDelay)
 
 	// call the service
 	httpClient := http.Client{
-		Timeout: time.Millisecond * 500,
+		Timeout: time.Millisecond * httpClientTimeout,
 	}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value="+expectedValue, httpAddr), nil)
 	assert.NoError(t, err)
@@ -239,11 +239,11 @@ func Test_ServeHTTP_EnableCORS(t *testing.T) {
 	go ServeHTTP(service, httpAddr, grpcAddr, true, nil)
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * serviceStartDelay)
 
 	// call the service
 	httpClient := http.Client{
-		Timeout: time.Millisecond * 500,
+		Timeout: time.Millisecond * httpClientTimeout,
 	}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value="+expectedValue, httpAddr), nil)
 	assert.NoError(t, err)
@@ -326,11 +326,11 @@ func Test_ServeHTTPWithTLS_Successful(t *testing.T) {
 	go ServeHTTPWithTLS(service, httpAddr, grpcAddr, false, nil, certFile, keyFile, true)
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * serviceStartDelay)
 
 	// call the service
 	httpClient := http.Client{
-		Timeout: time.Millisecond * 500,
+		Timeout: time.Millisecond * httpClientTimeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
@@ -368,11 +368,11 @@ func Test_ServeHTTPWithTLS_EnableCORS(t *testing.T) {
 	go ServeHTTPWithTLS(service, httpAddr, grpcAddr, true, nil, certFile, keyFile, true)
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * serviceStartDelay)
 
 	// call the service
 	httpClient := http.Client{
-		Timeout: time.Millisecond * 500,
+		Timeout: time.Millisecond * httpClientTimeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
