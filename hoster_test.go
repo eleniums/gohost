@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"math"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -22,9 +24,20 @@ import (
 
 const (
 	largeMessageLength = 1000
-	serviceStartDelay  = 500
-	httpClientTimeout  = 5000
 )
+
+var (
+	serviceStartDelay = time.Millisecond * 100
+	httpClientTimeout = time.Millisecond * 5000
+)
+
+func TestMain(m *testing.M) {
+	flag.DurationVar(&serviceStartDelay, "delay", serviceStartDelay, "time to delay in milliseconds so test service can start")
+	flag.DurationVar(&httpClientTimeout, "timeout", httpClientTimeout, "http client timeout in milliseconds")
+	flag.Parse()
+
+	os.Exit(m.Run())
+}
 
 func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	// arrange
@@ -39,7 +52,7 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
@@ -71,7 +84,7 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint_WithTLS(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})))
@@ -103,11 +116,11 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the HTTP endpoint
 	httpClient := http.Client{
-		Timeout: time.Millisecond * httpClientTimeout,
+		Timeout: httpClientTimeout,
 	}
 	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value="+expectedValue, httpAddr), nil)
 	assert.NoError(t, err)
@@ -142,11 +155,11 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the HTTP endpoint
 	httpClient := http.Client{
-		Timeout: time.Millisecond * httpClientTimeout,
+		Timeout: httpClientTimeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
@@ -186,7 +199,7 @@ func Test_Hoster_ListenAndServe_Logger(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
@@ -258,7 +271,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
@@ -289,7 +302,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
@@ -320,11 +333,11 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the HTTP endpoint
 	httpClient := http.Client{
-		Timeout: time.Millisecond * httpClientTimeout,
+		Timeout: httpClientTimeout,
 	}
 	httpReq := pb.SendRequest{
 		Value: largeValue,
@@ -359,7 +372,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Pass(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
@@ -388,7 +401,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Fail(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the gRPC endpoint
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
@@ -418,11 +431,11 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Pass(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the HTTP endpoint
 	httpClient := http.Client{
-		Timeout: time.Millisecond * httpClientTimeout,
+		Timeout: httpClientTimeout,
 	}
 	postReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/large?length=%v", httpAddr, largeMessageLength), nil)
 	assert.NoError(t, err)
@@ -454,11 +467,11 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Fail(t *testing.T) {
 	go hoster.ListenAndServe()
 
 	// make sure service has time to start
-	time.Sleep(time.Millisecond * serviceStartDelay)
+	time.Sleep(serviceStartDelay)
 
 	// call the service at the HTTP endpoint
 	httpClient := http.Client{
-		Timeout: time.Millisecond * httpClientTimeout,
+		Timeout: httpClientTimeout,
 	}
 	postReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/large?length=%v", httpAddr, largeMessageLength), nil)
 	assert.NoError(t, err)
