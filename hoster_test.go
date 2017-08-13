@@ -32,8 +32,8 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	flag.DurationVar(&serviceStartDelay, "delay", serviceStartDelay, "time to delay in milliseconds so test service can start")
-	flag.DurationVar(&httpClientTimeout, "timeout", httpClientTimeout, "http client timeout in milliseconds")
+	flag.DurationVar(&serviceStartDelay, "service-start-delay", serviceStartDelay, "time to delay in milliseconds so test service can start")
+	flag.DurationVar(&httpClientTimeout, "http-client-timeout", httpClientTimeout, "http client timeout in milliseconds")
 	flag.Parse()
 
 	os.Exit(m.Run())
