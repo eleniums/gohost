@@ -26,6 +26,10 @@ service TestService {
         get: "/v1/large"
     };
   }
+
+  // Stream a bunch of requests.
+  rpc Stream(stream SendRequest) returns (TestResponse) {
+  }
 }
 
 // Send request.

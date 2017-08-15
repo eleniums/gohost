@@ -526,3 +526,65 @@ func Test_Hoster_ListenAndServe_UnaryInterceptor(t *testing.T) {
 	assert.NotNil(t, grpcResp)
 	assert.Equal(t, expectedValue, grpcResp.Echo)
 }
+
+func Test_Hoster_ListenAndServe_StreamInterceptor(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	grpcAddr := getAddr(t)
+
+	hoster := NewHoster(service, grpcAddr)
+
+	count := 1
+	hoster.StreamInterceptors = append(hoster.StreamInterceptors, func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		assert.Equal(t, 1, count)
+		count++
+		return handler(srv, stream)
+	})
+	hoster.StreamInterceptors = append(hoster.StreamInterceptors, func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		assert.Equal(t, 2, count)
+		count++
+		return handler(srv, stream)
+	})
+	hoster.StreamInterceptors = append(hoster.StreamInterceptors, func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		assert.Equal(t, 3, count)
+		count++
+		return handler(srv, stream)
+	})
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(serviceStartDelay)
+
+	// call the service at the gRPC endpoint
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	assert.NoError(t, err)
+	client := pb.NewTestServiceClient(conn)
+	grpcResp, err := client.Stream(context.Background())
+	assert.NoError(t, err)
+
+	// send some values
+	err = grpcResp.Send(&pb.SendRequest{
+		Value: "value1",
+	})
+	assert.NoError(t, err)
+
+	err = grpcResp.Send(&pb.SendRequest{
+		Value: "value2",
+	})
+	assert.NoError(t, err)
+
+	err = grpcResp.Send(&pb.SendRequest{
+		Value: "value3",
+	})
+	assert.NoError(t, err)
+
+	// close out the stream
+	testResp, err := grpcResp.CloseAndRecv()
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, testResp)
+	assert.True(t, testResp.Success)
+}

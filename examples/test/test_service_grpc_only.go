@@ -1,6 +1,8 @@
 package test
 
 import (
+	"io"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
@@ -34,6 +36,21 @@ func (s *GRPCService) Large(ctx context.Context, in *pb.LargeRequest) (*pb.EchoR
 	return &pb.EchoResponse{
 		Echo: string(make([]byte, in.Length)),
 	}, nil
+}
+
+// Stream a bunch of requests.
+func (s *GRPCService) Stream(stream pb.TestService_StreamServer) error {
+	for {
+		_, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&pb.TestResponse{
+				Success: true,
+			})
+		}
+		if err != nil {
+			return err
+		}
+	}
 }
 
 // RegisterServer registers the gRPC server to use with a service.
