@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 )
 
@@ -26,6 +27,8 @@ type Hoster struct {
 	EnableCORS         bool
 	MaxSendMsgSize     int
 	MaxRecvMsgSize     int
+	UnaryInterceptors  []grpc.UnaryServerInterceptor
+	StreamInterceptors []grpc.StreamServerInterceptor
 	Logger             func(format string, v ...interface{})
 }
 
@@ -76,6 +79,16 @@ func (h *Hoster) ListenAndServe() error {
 	serverOpts := []grpc.ServerOption{
 		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
 		grpc.MaxRecvMsgSize(h.MaxRecvMsgSize),
+	}
+
+	// add interceptors
+	if len(h.UnaryInterceptors) > 0 {
+		unaryInterceptorChain := grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(h.UnaryInterceptors...))
+		serverOpts = append(serverOpts, unaryInterceptorChain)
+	}
+	if len(h.StreamInterceptors) > 0 {
+		streamInterceptorChain := grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(h.StreamInterceptors...))
+		serverOpts = append(serverOpts, streamInterceptorChain)
 	}
 
 	// start the gRPC endpoint
