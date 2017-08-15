@@ -7,4 +7,4 @@ go:
   - master
 
 script:
-  - go test -service-start-delay 1000ms -http-client-timeout 10000ms
+  - go test -service-start-delay 1000ms -http-client-timeout 60000ms
