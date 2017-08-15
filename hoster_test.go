@@ -479,3 +479,50 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Fail(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEqual(t, 200, doResp.StatusCode)
 }
+
+func Test_Hoster_ListenAndServe_UnaryInterceptor(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	grpcAddr := getAddr(t)
+
+	expectedValue := "test"
+
+	hoster := NewHoster(service, grpcAddr)
+
+	count := 1
+	hoster.UnaryInterceptors = append(hoster.UnaryInterceptors, func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		assert.Equal(t, 1, count)
+		count++
+		return handler(ctx, req)
+	})
+	hoster.UnaryInterceptors = append(hoster.UnaryInterceptors, func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		assert.Equal(t, 2, count)
+		count++
+		return handler(ctx, req)
+	})
+	hoster.UnaryInterceptors = append(hoster.UnaryInterceptors, func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		assert.Equal(t, 3, count)
+		count++
+		return handler(ctx, req)
+	})
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(serviceStartDelay)
+
+	// call the service at the gRPC endpoint
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	assert.NoError(t, err)
+	client := pb.NewTestServiceClient(conn)
+	grpcReq := pb.SendRequest{
+		Value: expectedValue,
+	}
+	grpcResp, err := client.Echo(context.Background(), &grpcReq)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, grpcResp)
+	assert.Equal(t, expectedValue, grpcResp.Echo)
+}
