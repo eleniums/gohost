@@ -18,18 +18,41 @@ const (
 
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
-	Service            GRPCService
-	GRPCAddr           string
-	HTTPAddr           string
-	CertFile           string
-	KeyFile            string
+	// Service contains the actual implementation of the service calls. Additionally implement the HTTPService interface if an HTTP endpoint is desired.
+	Service GRPCService
+
+	// GRPCAddr is the endpoint (host and port) on which to host the gRPC service.
+	GRPCAddr string
+
+	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. May be left blank if not using HTTP.
+	HTTPAddr string
+
+	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.
+	CertFile string
+
+	// KeyFile is the private key file for use with TLS. May be left blank if using insecure mode.
+	KeyFile string
+
+	// InsecureSkipVerify will cause verification of the host name during a TLS handshake to be skipped if set to true.
 	InsecureSkipVerify bool
-	EnableCORS         bool
-	MaxSendMsgSize     int
-	MaxRecvMsgSize     int
-	UnaryInterceptors  []grpc.UnaryServerInterceptor
+
+	// EnableCORS will enable all cross-origin resource sharing if set to true.
+	EnableCORS bool
+
+	// MaxSendMsgSize will change the size of the message that can be sent from the service.
+	MaxSendMsgSize int
+
+	// MaxRecvMsgSize will change the size of the message that can be received by the service.
+	MaxRecvMsgSize int
+
+	// UnaryInterceptors is an array of unary interceptors to be used by the service. They will be executed in order, from first to last.
+	UnaryInterceptors []grpc.UnaryServerInterceptor
+
+	// StreamInterceptors is an array of stream interceptors to be used by the service. They will be executed in order, from first to last.
 	StreamInterceptors []grpc.StreamServerInterceptor
-	Logger             func(format string, v ...interface{})
+
+	// Logger is the logging method to be used for info and error logging by the hoster.
+	Logger func(format string, v ...interface{})
 }
 
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
