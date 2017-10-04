@@ -12,6 +12,7 @@ func main() {
 	// command-line flags
 	grpcAddr := flag.String("grpc-addr", "127.0.0.1:50051", "host and port to host the gRPC endpoint")
 	httpAddr := flag.String("http-addr", "127.0.0.1:9090", "host and port to host the HTTP endpoint")
+	pprofAddr := flag.String("pprof-addr", "127.0.0.1:6060", "host and port to host the pprof endpoint (/debug/pprof/)")
 	enableCors := flag.Bool("enable-cors", false, "true to enable cross-origin resource sharing (CORS)")
 	certFile := flag.String("cert-file", "", "cert file for enabling a TLS connection")
 	keyFile := flag.String("key-file", "", "key file for enabling a TLS connection")
@@ -26,6 +27,7 @@ func main() {
 	// create the hoster
 	hoster := gohost.NewHoster(service, *grpcAddr)
 	hoster.HTTPAddr = *httpAddr
+	hoster.PprofAddr = *pprofAddr
 	hoster.EnableCORS = *enableCors
 	hoster.CertFile = *certFile
 	hoster.KeyFile = *keyFile

@@ -3,9 +3,13 @@ package gohost
 import (
 	"errors"
 	"math"
+	"net/http"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
+
+	// hosts pprof endpoint
+	_ "net/http/pprof"
 )
 
 const (
@@ -26,6 +30,9 @@ type Hoster struct {
 
 	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. May be left blank if not using HTTP.
 	HTTPAddr string
+
+	// PprofAddr is the endpoint (host and port) on which to host the /debug/pprof endpoint for profiling. May be left blank if not using pprof.
+	PprofAddr string
 
 	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.
 	CertFile string
@@ -96,6 +103,12 @@ func (h *Hoster) ListenAndServe() error {
 			h.log("Starting insecure HTTP endpoint: %v", h.HTTPAddr)
 			go ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
 		}
+	}
+
+	// check if pprof endpoint is enabled
+	if h.PprofAddr != "" {
+		h.log("Starting pprof endpoint: %v", h.PprofAddr)
+		go http.ListenAndServe(h.PprofAddr, nil)
 	}
 
 	// configure server options
