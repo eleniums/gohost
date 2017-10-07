@@ -82,14 +82,54 @@ func (h *Hoster) ListenAndServe() error {
 		return errors.New("gRPC address must be provided")
 	}
 
-	// check if pprof endpoint is enabled
-	if h.PPROFAddr != "" {
-		h.log("Starting pprof endpoint: %v", h.PPROFAddr)
-		go func() {
-			h.log("Error serving pprof endpoint: %v", http.ListenAndServe(h.PPROFAddr, nil))
-		}()
+	// serve pprof endpoint
+	h.servePPROF()
+
+	// serve HTTP endpoint
+	err := h.serveHTTP()
+	if err != nil {
+		return err
 	}
 
+	// serve gRPC endpoint
+	return h.serveGRPC()
+}
+
+// IsTLSEnabled will return true if TLS properties are set and ready to use.
+func (h *Hoster) IsTLSEnabled() bool {
+	return h.CertFile != "" && h.KeyFile != ""
+}
+
+// serveGRPC will start the gRPC endpoint.
+func (h *Hoster) serveGRPC() error {
+	// configure server options
+	serverOpts := []grpc.ServerOption{
+		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
+		grpc.MaxRecvMsgSize(h.MaxRecvMsgSize),
+	}
+
+	// add interceptors
+	if len(h.UnaryInterceptors) > 0 {
+		unaryInterceptorChain := grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(h.UnaryInterceptors...))
+		serverOpts = append(serverOpts, unaryInterceptorChain)
+	}
+	if len(h.StreamInterceptors) > 0 {
+		streamInterceptorChain := grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(h.StreamInterceptors...))
+		serverOpts = append(serverOpts, streamInterceptorChain)
+	}
+
+	// start the gRPC endpoint
+	if h.IsTLSEnabled() {
+		h.log("Starting gRPC endpoint with TLS enabled: %v", h.GRPCAddr)
+		return ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
+	}
+
+	h.log("Starting insecure gRPC endpoint: %v", h.GRPCAddr)
+	return ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
+}
+
+// serveHTTP will start the HTTP endpoint.
+func (h *Hoster) serveHTTP() error {
 	// check if HTTP endpoint is enabled
 	if h.HTTPAddr != "" {
 		// ensure interface is implemented
@@ -117,35 +157,18 @@ func (h *Hoster) ListenAndServe() error {
 		}
 	}
 
-	// configure server options
-	serverOpts := []grpc.ServerOption{
-		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
-		grpc.MaxRecvMsgSize(h.MaxRecvMsgSize),
-	}
-
-	// add interceptors
-	if len(h.UnaryInterceptors) > 0 {
-		unaryInterceptorChain := grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(h.UnaryInterceptors...))
-		serverOpts = append(serverOpts, unaryInterceptorChain)
-	}
-	if len(h.StreamInterceptors) > 0 {
-		streamInterceptorChain := grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(h.StreamInterceptors...))
-		serverOpts = append(serverOpts, streamInterceptorChain)
-	}
-
-	// start the gRPC endpoint
-	if h.IsTLSEnabled() {
-		h.log("Starting gRPC endpoint with TLS enabled: %v", h.GRPCAddr)
-		return ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
-	}
-
-	h.log("Starting insecure gRPC endpoint: %v", h.GRPCAddr)
-	return ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
+	return nil
 }
 
-// IsTLSEnabled will return true if TLS properties are set and ready to use.
-func (h *Hoster) IsTLSEnabled() bool {
-	return h.CertFile != "" && h.KeyFile != ""
+// servePPROF will start the pprof endpoint.
+func (h *Hoster) servePPROF() {
+	// check if pprof endpoint is enabled
+	if h.PPROFAddr != "" {
+		h.log("Starting pprof endpoint: %v", h.PPROFAddr)
+		go func() {
+			h.log("Error serving pprof endpoint: %v", http.ListenAndServe(h.PPROFAddr, nil))
+		}()
+	}
 }
 
 // log will safely call the log function provided.
