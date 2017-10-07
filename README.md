@@ -65,6 +65,7 @@ service := hello.NewService()
 // create the hoster
 hoster := gohost.NewHoster(service, *grpcAddr)
 hoster.HTTPAddr = *httpAddr
+hoster.PPROFAddr = *pprofAddr
 hoster.EnableCORS = *enableCors
 hoster.CertFile = *certFile
 hoster.KeyFile = *keyFile
@@ -76,7 +77,7 @@ hoster.Logger = log.Printf
 // start the server
 err := hoster.ListenAndServe()
 if err != nil {
-	log.Fatalf("unable to start the server: %v", err)
+	log.Fatalf("Unable to start the server: %v", err)
 }
 ```
 
