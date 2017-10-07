@@ -122,7 +122,7 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	httpClient := http.Client{
 		Timeout: httpClientTimeout,
 	}
-	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value="+expectedValue, httpAddr), nil)
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value=%v", httpAddr, expectedValue), nil)
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(httpReq)
 	assert.NoError(t, err)
@@ -166,7 +166,7 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 			},
 		},
 	}
-	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://%v/v1/echo?value="+expectedValue, httpAddr), nil)
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://%v/v1/echo?value=%v", httpAddr, expectedValue), nil)
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(httpReq)
 	assert.NoError(t, err)
@@ -179,6 +179,36 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, httpResp)
 	assert.Equal(t, expectedValue, httpResp.Echo)
+}
+
+func Test_Hoster_ListenAndServe_PPROFEndpoint(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	pprofAddr := getAddr(t)
+	grpcAddr := getAddr(t)
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.PPROFAddr = pprofAddr
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(serviceStartDelay)
+
+	// call the service at the HTTP endpoint
+	httpClient := http.Client{
+		Timeout: httpClientTimeout,
+	}
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/debug/pprof", pprofAddr), nil)
+	assert.NoError(t, err)
+	doResp, err := httpClient.Do(httpReq)
+	assert.NoError(t, err)
+	body, err := ioutil.ReadAll(doResp.Body)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
 }
 
 func Test_Hoster_ListenAndServe_Logger(t *testing.T) {
