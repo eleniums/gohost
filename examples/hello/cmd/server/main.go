@@ -27,7 +27,7 @@ func main() {
 	// create the hoster
 	hoster := gohost.NewHoster(service, *grpcAddr)
 	hoster.HTTPAddr = *httpAddr
-	hoster.PprofAddr = *pprofAddr
+	hoster.PPROFAddr = *pprofAddr
 	hoster.EnableCORS = *enableCors
 	hoster.CertFile = *certFile
 	hoster.KeyFile = *keyFile

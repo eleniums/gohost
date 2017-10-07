@@ -31,8 +31,8 @@ type Hoster struct {
 	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. May be left blank if not using HTTP.
 	HTTPAddr string
 
-	// PprofAddr is the endpoint (host and port) on which to host the /debug/pprof endpoint for profiling. May be left blank if not using pprof.
-	PprofAddr string
+	// PPROFAddr is the endpoint (host and port) on which to host the /debug/pprof endpoint for profiling. May be left blank if not using pprof.
+	PPROFAddr string
 
 	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.
 	CertFile string
@@ -82,6 +82,14 @@ func (h *Hoster) ListenAndServe() error {
 		return errors.New("gRPC address must be provided")
 	}
 
+	// check if pprof endpoint is enabled
+	if h.PPROFAddr != "" {
+		h.log("Starting pprof endpoint: %v", h.PPROFAddr)
+		go func() {
+			h.log("Error serving pprof endpoint: %v", http.ListenAndServe(h.PPROFAddr, nil))
+		}()
+	}
+
 	// check if HTTP endpoint is enabled
 	if h.HTTPAddr != "" {
 		// ensure interface is implemented
@@ -98,17 +106,15 @@ func (h *Hoster) ListenAndServe() error {
 		// start the HTTP endpoint
 		if h.IsTLSEnabled() {
 			h.log("Starting HTTP endpoint with TLS enabled: %v", h.HTTPAddr)
-			go ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify)
+			go func() {
+				h.log("Error serving HTTP endpoint: %v", ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify))
+			}()
 		} else {
 			h.log("Starting insecure HTTP endpoint: %v", h.HTTPAddr)
-			go ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
+			go func() {
+				h.log("Error serving HTTP endpoint: %v", ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts))
+			}()
 		}
-	}
-
-	// check if pprof endpoint is enabled
-	if h.PprofAddr != "" {
-		h.log("Starting pprof endpoint: %v", h.PprofAddr)
-		go http.ListenAndServe(h.PprofAddr, nil)
 	}
 
 	// configure server options
