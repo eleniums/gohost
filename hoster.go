@@ -3,9 +3,13 @@ package gohost
 import (
 	"errors"
 	"math"
+	"net/http"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
+
+	// hosts pprof endpoint
+	_ "net/http/pprof"
 )
 
 const (
@@ -26,6 +30,9 @@ type Hoster struct {
 
 	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. May be left blank if not using HTTP.
 	HTTPAddr string
+
+	// PPROFAddr is the endpoint (host and port) on which to host the /debug/pprof endpoint for profiling. May be left blank if not using pprof.
+	PPROFAddr string
 
 	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.
 	CertFile string
@@ -75,29 +82,26 @@ func (h *Hoster) ListenAndServe() error {
 		return errors.New("gRPC address must be provided")
 	}
 
-	// check if HTTP endpoint is enabled
-	if h.HTTPAddr != "" {
-		// ensure interface is implemented
-		httpService, ok := h.Service.(HTTPService)
-		if !ok {
-			return errors.New("service does not implement HTTP interface")
-		}
+	// serve pprof endpoint
+	h.servePPROF()
 
-		// configure dial options
-		dialOpts := []grpc.DialOption{
-			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
-		}
-
-		// start the HTTP endpoint
-		if h.IsTLSEnabled() {
-			h.log("Starting HTTP endpoint with TLS enabled: %v", h.HTTPAddr)
-			go ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify)
-		} else {
-			h.log("Starting insecure HTTP endpoint: %v", h.HTTPAddr)
-			go ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
-		}
+	// serve HTTP endpoint
+	err := h.serveHTTP()
+	if err != nil {
+		return err
 	}
 
+	// serve gRPC endpoint
+	return h.serveGRPC()
+}
+
+// IsTLSEnabled will return true if TLS properties are set and ready to use.
+func (h *Hoster) IsTLSEnabled() bool {
+	return h.CertFile != "" && h.KeyFile != ""
+}
+
+// serveGRPC will start the gRPC endpoint.
+func (h *Hoster) serveGRPC() error {
 	// configure server options
 	serverOpts := []grpc.ServerOption{
 		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
@@ -124,9 +128,47 @@ func (h *Hoster) ListenAndServe() error {
 	return ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
 }
 
-// IsTLSEnabled will return true if TLS properties are set and ready to use.
-func (h *Hoster) IsTLSEnabled() bool {
-	return h.CertFile != "" && h.KeyFile != ""
+// serveHTTP will start the HTTP endpoint.
+func (h *Hoster) serveHTTP() error {
+	// check if HTTP endpoint is enabled
+	if h.HTTPAddr != "" {
+		// ensure interface is implemented
+		httpService, ok := h.Service.(HTTPService)
+		if !ok {
+			return errors.New("service does not implement HTTP interface")
+		}
+
+		// configure dial options
+		dialOpts := []grpc.DialOption{
+			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
+		}
+
+		// start the HTTP endpoint
+		if h.IsTLSEnabled() {
+			h.log("Starting HTTP endpoint with TLS enabled: %v", h.HTTPAddr)
+			go func() {
+				h.log("Error serving HTTP endpoint: %v", ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify))
+			}()
+		} else {
+			h.log("Starting insecure HTTP endpoint: %v", h.HTTPAddr)
+			go func() {
+				h.log("Error serving HTTP endpoint: %v", ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts))
+			}()
+		}
+	}
+
+	return nil
+}
+
+// servePPROF will start the pprof endpoint.
+func (h *Hoster) servePPROF() {
+	// check if pprof endpoint is enabled
+	if h.PPROFAddr != "" {
+		h.log("Starting pprof endpoint: %v", h.PPROFAddr)
+		go func() {
+			h.log("Error serving pprof endpoint: %v", http.ListenAndServe(h.PPROFAddr, nil))
+		}()
+	}
 }
 
 // log will safely call the log function provided.
