@@ -39,6 +39,6 @@ func main() {
 	// start the server
 	err := hoster.ListenAndServe()
 	if err != nil {
-		log.Fatalf("unable to start the server: %v", err)
+		log.Fatalf("Unable to start the server: %v", err)
 	}
 }

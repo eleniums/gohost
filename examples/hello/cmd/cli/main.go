@@ -34,7 +34,7 @@ func main() {
 	// dial the service
 	conn, err := grpc.Dial(*grpcAddr, creds)
 	if err != nil {
-		log.Fatalf("failed to dail service: %v", err)
+		log.Fatalf("Failed to dial service: %v", err)
 	}
 
 	// create client for service
@@ -50,7 +50,7 @@ func main() {
 	// call the hello function on the server
 	response, err := client.Hello(context.Background(), &request)
 	if err != nil {
-		log.Fatalf("failed to say hello: %v", err)
+		log.Fatalf("Failed to say hello: %v", err)
 	}
 
 	// display server response
