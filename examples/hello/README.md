@@ -30,9 +30,10 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
 - With TLS
     - `curl -k https://127.0.0.1:9090/v1/hello?name=eleniums`
 
-## Test the pprof endpoint
+## Test the debug endpoint
 - Navigate to:
     - http://127.0.0.1:6060/debug/pprof/
+    - http://127.0.0.1:6060/debug/vars/
 
 ## Generate Stubs
 

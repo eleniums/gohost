@@ -8,7 +8,8 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 
-	// hosts pprof endpoint
+	// register debug http handlers
+	_ "expvar"
 	_ "net/http/pprof"
 )
 
@@ -31,8 +32,8 @@ type Hoster struct {
 	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. May be left blank if not using HTTP.
 	HTTPAddr string
 
-	// PPROFAddr is the endpoint (host and port) on which to host the /debug/pprof endpoint for profiling. May be left blank if not using pprof.
-	PPROFAddr string
+	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof/ and /debug/vars/). May be left blank to disable debug endpoint.
+	DebugAddr string
 
 	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.
 	CertFile string
@@ -82,8 +83,8 @@ func (h *Hoster) ListenAndServe() error {
 		return errors.New("gRPC address must be provided")
 	}
 
-	// serve pprof endpoint
-	h.servePPROF()
+	// serve debug endpoint
+	h.serveDebug()
 
 	// serve HTTP endpoint
 	err := h.serveHTTP()
@@ -160,13 +161,13 @@ func (h *Hoster) serveHTTP() error {
 	return nil
 }
 
-// servePPROF will start the pprof endpoint.
-func (h *Hoster) servePPROF() {
-	// check if pprof endpoint is enabled
-	if h.PPROFAddr != "" {
-		h.log("Starting pprof endpoint: %v", h.PPROFAddr)
+// serveDebug will start the debug endpoint.
+func (h *Hoster) serveDebug() {
+	// check if debug endpoint is enabled
+	if h.DebugAddr != "" {
+		h.log("Starting debug endpoint: %v", h.DebugAddr)
 		go func() {
-			h.log("Error serving pprof endpoint: %v", http.ListenAndServe(h.PPROFAddr, nil))
+			h.log("Error serving debug endpoint: %v", http.ListenAndServe(h.DebugAddr, nil))
 		}()
 	}
 }

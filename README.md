@@ -65,7 +65,7 @@ service := hello.NewService()
 // create the hoster
 hoster := gohost.NewHoster(service, *grpcAddr)
 hoster.HTTPAddr = *httpAddr
-hoster.PPROFAddr = *pprofAddr
+hoster.DebugAddr = *debugAddr
 hoster.EnableCORS = *enableCors
 hoster.CertFile = *certFile
 hoster.KeyFile = *keyFile
