@@ -12,7 +12,7 @@ func main() {
 	// command-line flags
 	grpcAddr := flag.String("grpc-addr", "127.0.0.1:50051", "host and port to host the gRPC endpoint")
 	httpAddr := flag.String("http-addr", "127.0.0.1:9090", "host and port to host the HTTP endpoint")
-	debugAddr := flag.String("debug-addr", "127.0.0.1:6060", "host and port to host the debug endpoint (/debug/pprof/ and /debug/vars/)")
+	debugAddr := flag.String("debug-addr", "127.0.0.1:6060", "host and port to host the debug endpoint (/debug/pprof and /debug/vars)")
 	enableCors := flag.Bool("enable-cors", false, "true to enable cross-origin resource sharing (CORS)")
 	certFile := flag.String("cert-file", "", "cert file for enabling a TLS connection")
 	keyFile := flag.String("key-file", "", "key file for enabling a TLS connection")

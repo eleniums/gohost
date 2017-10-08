@@ -32,7 +32,7 @@ type Hoster struct {
 	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. May be left blank if not using HTTP.
 	HTTPAddr string
 
-	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof/ and /debug/vars/). May be left blank to disable debug endpoint.
+	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). May be left blank to disable debug endpoint.
 	DebugAddr string
 
 	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.

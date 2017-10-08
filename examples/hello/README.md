@@ -32,8 +32,8 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
 
 ## Test the debug endpoint
 - Navigate to:
-    - http://127.0.0.1:6060/debug/pprof/
-    - http://127.0.0.1:6060/debug/vars/
+    - http://127.0.0.1:6060/debug/pprof
+    - http://127.0.0.1:6060/debug/vars
 
 ## Generate Stubs
 
