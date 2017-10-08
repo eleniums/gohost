@@ -181,14 +181,14 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 	assert.Equal(t, expectedValue, httpResp.Echo)
 }
 
-func Test_Hoster_ListenAndServe_PPROFEndpoint(t *testing.T) {
+func Test_Hoster_ListenAndServe_DebugEndpoint_Pprof(t *testing.T) {
 	// arrange
 	service := test.NewService()
-	pprofAddr := getAddr(t)
+	debugAddr := getAddr(t)
 	grpcAddr := getAddr(t)
 
 	hoster := NewHoster(service, grpcAddr)
-	hoster.PPROFAddr = pprofAddr
+	hoster.DebugAddr = debugAddr
 
 	// act - start the service
 	go hoster.ListenAndServe()
@@ -200,7 +200,37 @@ func Test_Hoster_ListenAndServe_PPROFEndpoint(t *testing.T) {
 	httpClient := http.Client{
 		Timeout: httpClientTimeout,
 	}
-	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/debug/pprof", pprofAddr), nil)
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/debug/pprof", debugAddr), nil)
+	assert.NoError(t, err)
+	doResp, err := httpClient.Do(httpReq)
+	assert.NoError(t, err)
+	body, err := ioutil.ReadAll(doResp.Body)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+}
+
+func Test_Hoster_ListenAndServe_DebugEndpoint_Vars(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	debugAddr := getAddr(t)
+	grpcAddr := getAddr(t)
+
+	hoster := NewHoster(service, grpcAddr)
+	hoster.DebugAddr = debugAddr
+
+	// act - start the service
+	go hoster.ListenAndServe()
+
+	// make sure service has time to start
+	time.Sleep(serviceStartDelay)
+
+	// call the service at the HTTP endpoint
+	httpClient := http.Client{
+		Timeout: httpClientTimeout,
+	}
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/debug/vars", debugAddr), nil)
 	assert.NoError(t, err)
 	doResp, err := httpClient.Do(httpReq)
 	assert.NoError(t, err)
