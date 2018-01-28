@@ -13,10 +13,5 @@
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
 
-# Ignore everything in vendor, except for *.go files, LICENSE and COPYING. Ignore Go tests.
-vendor/**/*
-!vendor/**/
-!vendor/**/*.go
-!vendor/**/LICENSE*
-!vendor/**/COPYING*
-vendor/**/*_test.go
+# Ignore vendor - use "dep ensure"
+vendor/

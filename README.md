@@ -1,18 +1,19 @@
 # gohost
 
-[![Build Status](https://travis-ci.org/eleniums/gohost.svg?branch=master)](https://travis-ci.org/eleniums/gohost) [![Go Report Card](https://goreportcard.com/badge/github.com/eleniums/gohost)](https://goreportcard.com/report/github.com/eleniums/gohost) [![Coverage](http://gocover.io/_badge/github.com/eleniums/gohost)](http://gocover.io/github.com/eleniums/gohost) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/eleniums/gohost/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/eleniums/gohost?status.svg)](https://godoc.org/github.com/eleniums/gohost)
+[![Build Status](https://travis-ci.org/eleniums/gohost.svg?branch=master)](https://travis-ci.org/eleniums/gohost) [![Go Report Card](https://goreportcard.com/badge/github.com/eleniums/gohost)](https://goreportcard.com/report/github.com/eleniums/gohost) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/eleniums/gohost/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/eleniums/gohost?status.svg)](https://godoc.org/github.com/eleniums/gohost)
 
 A tool for hosting a Go service with gRPC and HTTP endpoints.
 
 ## Installation
 
 ```
-go get github.com/eleniums/gohost
+go get -u github.com/eleniums/gohost
+dep ensure
 ```
 
 ## Prerequisites
 
-- Requires Go 1.6 or later
+- Requires Go 1.8 or later
 - Uses [dep](https://github.com/golang/dep) for dependencies
 - Uses [grpc-go](https://github.com/grpc/grpc-go) for gRPC endpoints
 - Uses [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) for HTTP endpoints

@@ -1,11 +1,18 @@
 language: go
 
 go:
-  - 1.6
-  - 1.7.x
   - 1.8.x
   - 1.9.x
   - master
 
+sudo: false
+
+before_install:
+  - gotools=golang.org/x/tools
+
+install:
+  - go get -u github.com/golang/dep/cmd/dep
+  - dep ensure -v
+
 script:
-  - go test -service-start-delay 1000ms -http-client-timeout 60000ms
+  - go test -v -cover -service-start-delay 1000ms -http-client-timeout 60000ms
