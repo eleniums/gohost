@@ -97,27 +97,6 @@
       },
       "description": "Echo response."
     },
-    "testLargeRequest": {
-      "type": "object",
-      "properties": {
-        "length": {
-          "type": "string",
-          "format": "int64",
-          "description": "Length of string to return in response."
-        }
-      },
-      "description": "Large request."
-    },
-    "testSendRequest": {
-      "type": "object",
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Value to send."
-        }
-      },
-      "description": "Send request."
-    },
     "testTestResponse": {
       "type": "object",
       "properties": {
