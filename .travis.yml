@@ -7,6 +7,11 @@ go:
   - 1.9.x
   - master
 
+sudo: false
+
+before_install:
+  - gotools=golang.org/x/tools
+
 install:
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure -v
