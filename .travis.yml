@@ -7,5 +7,9 @@ go:
   - 1.9.x
   - master
 
+install:
+  - go get -u github.com/golang/dep/cmd/dep
+  - dep ensure -v
+
 script:
   - go test -service-start-delay 1000ms -http-client-timeout 60000ms
