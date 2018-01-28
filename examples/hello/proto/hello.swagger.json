@@ -43,16 +43,6 @@
     }
   },
   "definitions": {
-    "helloHelloRequest": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of caller."
-        }
-      },
-      "description": "Request for service to say hello."
-    },
     "helloHelloResponse": {
       "type": "object",
       "properties": {
