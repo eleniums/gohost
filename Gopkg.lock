@@ -63,7 +63,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "context",
+    "golang.org/x/net/context",
     "http2",
     "http2/hpack",
     "idna",

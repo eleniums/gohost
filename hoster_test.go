@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"net"
 	"net/http"
 	"os"
 	"testing"
@@ -647,4 +648,13 @@ func Test_Hoster_ListenAndServe_StreamInterceptor(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, testResp)
 	assert.True(t, testResp.Success)
+}
+
+// getAddr is a helper function that will retrieve a 127.0.0.1 address with an open port.
+func getAddr(t *testing.T) string {
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	assert.NoError(t, err)
+	defer lis.Close()
+
+	return lis.Addr().String()
 }

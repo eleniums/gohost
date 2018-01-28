@@ -5,6 +5,8 @@ import (
 	"math"
 	"net/http"
 
+	gogrpc "github.com/eleniums/gohost/grpc"
+	gohttp "github.com/eleniums/gohost/http"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 
@@ -24,7 +26,7 @@ const (
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
 	// Service contains the actual implementation of the service calls. Additionally implement the HTTPService interface if an HTTP endpoint is desired.
-	Service GRPCService
+	Service gogrpc.GRPCService
 
 	// GRPCAddr is the endpoint (host and port) on which to host the gRPC service.
 	GRPCAddr string
@@ -64,7 +66,7 @@ type Hoster struct {
 }
 
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
-func NewHoster(service GRPCService, grpcAddr string) *Hoster {
+func NewHoster(service gogrpc.GRPCService, grpcAddr string) *Hoster {
 	return &Hoster{
 		Service:        service,
 		GRPCAddr:       grpcAddr,
@@ -122,11 +124,11 @@ func (h *Hoster) serveGRPC() error {
 	// start the gRPC endpoint
 	if h.IsTLSEnabled() {
 		h.log("Starting gRPC endpoint with TLS enabled: %v", h.GRPCAddr)
-		return ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
+		return gogrpc.ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
 	}
 
 	h.log("Starting insecure gRPC endpoint: %v", h.GRPCAddr)
-	return ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
+	return gogrpc.ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
 }
 
 // serveHTTP will start the HTTP endpoint.
@@ -134,7 +136,7 @@ func (h *Hoster) serveHTTP() error {
 	// check if HTTP endpoint is enabled
 	if h.HTTPAddr != "" {
 		// ensure interface is implemented
-		httpService, ok := h.Service.(HTTPService)
+		httpService, ok := h.Service.(gohttp.HTTPService)
 		if !ok {
 			return errors.New("service does not implement HTTP interface")
 		}
@@ -148,12 +150,12 @@ func (h *Hoster) serveHTTP() error {
 		if h.IsTLSEnabled() {
 			h.log("Starting HTTP endpoint with TLS enabled: %v", h.HTTPAddr)
 			go func() {
-				h.log("Error serving HTTP endpoint: %v", ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify))
+				h.log("Error serving HTTP endpoint: %v", gohttp.ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify))
 			}()
 		} else {
 			h.log("Starting insecure HTTP endpoint: %v", h.HTTPAddr)
 			go func() {
-				h.log("Error serving HTTP endpoint: %v", ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts))
+				h.log("Error serving HTTP endpoint: %v", gohttp.ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts))
 			}()
 		}
 	}
