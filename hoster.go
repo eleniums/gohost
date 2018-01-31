@@ -25,6 +25,9 @@ const (
 
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
+	// Endpoints are the endpoints that will be hosted.
+	Endpoints []HosterEndpoint
+
 	// Service contains the actual implementation of the service calls. Additionally implement the HTTPService interface if an HTTP endpoint is desired.
 	Service gogrpc.GRPCService
 
