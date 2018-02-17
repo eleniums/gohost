@@ -6,6 +6,9 @@ import (
 
 	"github.com/eleniums/gohost"
 	"github.com/eleniums/gohost/examples/hello"
+	"google.golang.org/grpc"
+
+	pb "github.com/eleniums/gohost/examples/hello/proto"
 )
 
 func main() {
@@ -25,7 +28,8 @@ func main() {
 	service := hello.NewService()
 
 	// create the hoster
-	hoster := gohost.NewHoster(service, *grpcAddr)
+	hoster := gohost.NewHoster()
+	hoster.GRPCAddr = *grpcAddr
 	hoster.HTTPAddr = *httpAddr
 	hoster.DebugAddr = *debugAddr
 	hoster.EnableCORS = *enableCors
@@ -34,7 +38,13 @@ func main() {
 	hoster.InsecureSkipVerify = *insecureSkipVerify
 	hoster.MaxSendMsgSize = *maxSendMsgSize
 	hoster.MaxRecvMsgSize = *maxRecvMsgSize
-	hoster.Logger = log.Printf
+
+	hoster.AddGRPCEndpoint(func(s *grpc.Server) {
+		log.Printf("Registered grpc server at: %v", *grpcAddr)
+		pb.RegisterHelloServiceServer(s, service)
+	})
+
+	hoster.AddHTTPGateway(pb.RegisterHelloServiceHandlerFromEndpoint)
 
 	// start the server
 	err := hoster.ListenAndServe()
