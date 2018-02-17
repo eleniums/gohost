@@ -5,12 +5,21 @@ import (
 	"fmt"
 	"net"
 
-	rpc "google.golang.org/grpc"
+	"github.com/grpc-ecosystem/go-grpc-middleware"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
 // serveGRPC will start the gRPC endpoint.
 func (h *Hoster) serveGRPC() error {
+	// validate parameters
+	if len(h.grpcEndpoints) == 0 {
+		return errors.New("no grpc servers added")
+	}
+	if h.GRPCAddr == "" {
+		return errors.New("grpc address cannot be empty")
+	}
+
 	// configure server options
 	serverOpts := []grpc.ServerOption{
 		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
@@ -29,46 +38,33 @@ func (h *Hoster) serveGRPC() error {
 
 	// start the gRPC endpoint
 	if h.IsTLSEnabled() {
-		return gogrpc.ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
+		return ServeGRPCWithTLS(h.grpcEndpoints, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
 	}
 
-	return gogrpc.ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
+	return ServeGRPC(h.grpcEndpoints, h.GRPCAddr, serverOpts)
 }
 
+// TODO: move this code up into the above method
 // ServeGRPC starts a gRPC endpoint for the given service.
-func ServeGRPC(service GRPCService, grpcAddr string, opts []rpc.ServerOption) error {
-	// validate parameters
-	if service == nil {
-		return errors.New("service cannot be nil")
-	}
-	if grpcAddr == "" {
-		return errors.New("grpc address cannot be empty")
-	}
-
+func ServeGRPC(servers []func(s *grpc.Server), addr string, opts []grpc.ServerOption) error {
 	// start listening
-	lis, err := net.Listen("tcp", grpcAddr)
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
 	}
 
-	// register server
-	grpcServer := rpc.NewServer(opts...)
-	service.RegisterServer(grpcServer)
+	// register servers
+	grpcServer := grpc.NewServer(opts...)
+	for i := range servers {
+		servers[i](grpcServer)
+	}
 
-	// start server
+	// start servers
 	return grpcServer.Serve(lis)
 }
 
 // ServeGRPCWithTLS starts a gRPC endpoint for the given service with TLS enabled.
-func ServeGRPCWithTLS(service GRPCService, grpcAddr string, opts []rpc.ServerOption, certFile string, keyFile string) error {
-	// validate parameters
-	if certFile == "" {
-		return errors.New("cert file cannot be empty")
-	}
-	if keyFile == "" {
-		return errors.New("key file cannot be empty")
-	}
-
+func ServeGRPCWithTLS(servers []func(s *grpc.Server), addr string, opts []grpc.ServerOption, certFile string, keyFile string) error {
 	// create TLS credentials
 	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 	if err != nil {
@@ -76,8 +72,8 @@ func ServeGRPCWithTLS(service GRPCService, grpcAddr string, opts []rpc.ServerOpt
 	}
 
 	// add TLS credentials to options
-	opts = append(opts, rpc.Creds(creds))
+	opts = append(opts, grpc.Creds(creds))
 
 	// start server
-	return ServeGRPC(service, grpcAddr, opts)
+	return ServeGRPC(servers, addr, opts)
 }
