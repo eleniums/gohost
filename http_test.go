@@ -1,4 +1,4 @@
-package http
+package gohost
 
 import (
 	"crypto/tls"
