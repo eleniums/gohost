@@ -26,7 +26,7 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
 
 ## Test the HTTP endpoint with curl
 - Insecure
-    - `curl 127.0.0.1:9090/v1/hello?name=eleniums`
+    - `curl http://127.0.0.1:9090/v1/hello?name=eleniums`
 - With TLS
     - `curl -k https://127.0.0.1:9090/v1/hello?name=eleniums`
 
