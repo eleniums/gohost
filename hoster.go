@@ -1,13 +1,13 @@
 package gohost
 
 import (
+	"context"
 	"errors"
 	"math"
 	"net/http"
 
-	gogrpc "github.com/eleniums/gohost/grpc"
-	gohttp "github.com/eleniums/gohost/http"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
 	// register debug http handlers
@@ -25,16 +25,10 @@ const (
 
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
-	// Endpoints are the endpoints that will be hosted.
-	Endpoints []HosterEndpoint
-
-	// Service contains the actual implementation of the service calls. Additionally implement the HTTPService interface if an HTTP endpoint is desired.
-	Service gogrpc.GRPCService
-
-	// GRPCAddr is the endpoint (host and port) on which to host the gRPC service.
+	// GRPCAddr is the endpoint (host and port) on which to host the gRPC services.
 	GRPCAddr string
 
-	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. May be left blank if not using HTTP.
+	// HTTPAddr is the endpoint (host and port) on which to host the HTTP services. May be left blank if not using HTTP.
 	HTTPAddr string
 
 	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). May be left blank to disable debug endpoint.
@@ -66,16 +60,25 @@ type Hoster struct {
 
 	// Logger is the logging method to be used for info and error logging by the hoster.
 	Logger func(format string, v ...interface{})
+
+	grpcEndpoints []func(s *grpc.Server)
+	httpEndpoints []func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 }
 
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
-func NewHoster(service gogrpc.GRPCService, grpcAddr string) *Hoster {
+func NewHoster() *Hoster {
 	return &Hoster{
-		Service:        service,
-		GRPCAddr:       grpcAddr,
 		MaxSendMsgSize: DefaultMaxSendMsgSize,
 		MaxRecvMsgSize: DefaultMaxRecvMsgSize,
 	}
+}
+
+func (h *Hoster) AddGRPCEndpoint(endpoint ...func(s *grpc.Server)) {
+	h.grpcEndpoints = append(h.grpcEndpoints, endpoint...)
+}
+
+func (h *Hoster) AddHTTPGateway(gateway ...func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)) {
+	h.httpEndpoints = append(h.httpEndpoints, gateway...)
 }
 
 // ListenAndServe creates and starts the server.
