@@ -58,9 +58,6 @@ type Hoster struct {
 	// StreamInterceptors is an array of stream interceptors to be used by the service. They will be executed in order, from first to last.
 	StreamInterceptors []grpc.StreamServerInterceptor
 
-	// Logger is the logging method to be used for info and error logging by the hoster.
-	Logger func(format string, v ...interface{})
-
 	grpcEndpoints []func(s *grpc.Server)
 	httpEndpoints []func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 }
@@ -129,11 +126,9 @@ func (h *Hoster) serveGRPC() error {
 
 	// start the gRPC endpoint
 	if h.IsTLSEnabled() {
-		h.log("Starting gRPC endpoint with TLS enabled: %v", h.GRPCAddr)
 		return gogrpc.ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
 	}
 
-	h.log("Starting insecure gRPC endpoint: %v", h.GRPCAddr)
 	return gogrpc.ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
 }
 
@@ -154,14 +149,12 @@ func (h *Hoster) serveHTTP() error {
 
 		// start the HTTP endpoint
 		if h.IsTLSEnabled() {
-			h.log("Starting HTTP endpoint with TLS enabled: %v", h.HTTPAddr)
 			go func() {
-				h.log("Error serving HTTP endpoint: %v", gohttp.ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify))
+				gohttp.ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify)
 			}()
 		} else {
-			h.log("Starting insecure HTTP endpoint: %v", h.HTTPAddr)
 			go func() {
-				h.log("Error serving HTTP endpoint: %v", gohttp.ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts))
+				gohttp.ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
 			}()
 		}
 	}
@@ -173,16 +166,8 @@ func (h *Hoster) serveHTTP() error {
 func (h *Hoster) serveDebug() {
 	// check if debug endpoint is enabled
 	if h.DebugAddr != "" {
-		h.log("Starting debug endpoint: %v", h.DebugAddr)
 		go func() {
-			h.log("Error serving debug endpoint: %v", http.ListenAndServe(h.DebugAddr, nil))
+			http.ListenAndServe(h.DebugAddr, nil)
 		}()
-	}
-}
-
-// log will safely call the log function provided.
-func (h *Hoster) log(format string, v ...interface{}) {
-	if h.Logger != nil {
-		h.Logger(format, v...)
 	}
 }
