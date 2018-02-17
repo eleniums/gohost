@@ -1,9 +1,6 @@
 package gohost
 
 import (
-	"context"
-
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
 	// register debug http handlers
@@ -54,8 +51,8 @@ type Hoster struct {
 	// StreamInterceptors is an array of stream interceptors to be used by the service. They will be executed in order, from first to last.
 	StreamInterceptors []grpc.StreamServerInterceptor
 
-	grpcEndpoints []func(s *grpc.Server)
-	httpEndpoints []func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+	grpcEndpoints []grpcServer
+	httpEndpoints []httpGateway
 }
 
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
@@ -66,11 +63,11 @@ func NewHoster() *Hoster {
 	}
 }
 
-func (h *Hoster) AddGRPCEndpoint(endpoint ...func(s *grpc.Server)) {
+func (h *Hoster) AddGRPCEndpoint(endpoint ...grpcServer) {
 	h.grpcEndpoints = append(h.grpcEndpoints, endpoint...)
 }
 
-func (h *Hoster) AddHTTPGateway(gateway ...func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)) {
+func (h *Hoster) AddHTTPGateway(gateway ...httpGateway) {
 	h.httpEndpoints = append(h.httpEndpoints, gateway...)
 }
 

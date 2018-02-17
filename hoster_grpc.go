@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+type grpcServer func(s *grpc.Server)
+
 // serveGRPC will start the gRPC endpoint.
 func (h *Hoster) serveGRPC() error {
 	// validate parameters
@@ -46,7 +48,7 @@ func (h *Hoster) serveGRPC() error {
 
 // TODO: move this code up into the above method
 // ServeGRPC starts a gRPC endpoint for the given service.
-func ServeGRPC(servers []func(s *grpc.Server), addr string, opts []grpc.ServerOption) error {
+func ServeGRPC(servers []grpcServer, addr string, opts []grpc.ServerOption) error {
 	// start listening
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -64,7 +66,7 @@ func ServeGRPC(servers []func(s *grpc.Server), addr string, opts []grpc.ServerOp
 }
 
 // ServeGRPCWithTLS starts a gRPC endpoint for the given service with TLS enabled.
-func ServeGRPCWithTLS(servers []func(s *grpc.Server), addr string, opts []grpc.ServerOption, certFile string, keyFile string) error {
+func ServeGRPCWithTLS(servers []grpcServer, addr string, opts []grpc.ServerOption, certFile string, keyFile string) error {
 	// create TLS credentials
 	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 	if err != nil {
