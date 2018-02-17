@@ -2,10 +2,6 @@ package gohost
 
 import (
 	"google.golang.org/grpc"
-
-	// register debug http handlers
-	_ "expvar"
-	_ "net/http/pprof"
 )
 
 const (
@@ -74,7 +70,9 @@ func (h *Hoster) AddHTTPGateway(gateway ...httpGateway) {
 // ListenAndServe creates and starts the server.
 func (h *Hoster) ListenAndServe() error {
 	// serve debug endpoint
-	h.serveDebug()
+	go func() {
+		h.serveDebug()
+	}()
 
 	// serve HTTP endpoint
 	go func() {
