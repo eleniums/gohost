@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"math"
 	h "net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -12,6 +13,36 @@ import (
 	g "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
+
+// serveHTTP will start the HTTP endpoint.
+func (h *Hoster) serveHTTP() error {
+	// check if HTTP endpoint is enabled
+	if h.HTTPAddr != "" {
+		// ensure interface is implemented
+		httpService, ok := h.Service.(gohttp.HTTPService)
+		if !ok {
+			return errors.New("service does not implement HTTP interface")
+		}
+
+		// configure dial options
+		dialOpts := []grpc.DialOption{
+			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
+		}
+
+		// start the HTTP endpoint
+		if h.IsTLSEnabled() {
+			go func() {
+				gohttp.ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify)
+			}()
+		} else {
+			go func() {
+				gohttp.ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
+			}()
+		}
+	}
+
+	return nil
+}
 
 // ServeHTTP starts an HTTP endpoint for a given service. This is a gateway pointing to a gRPC endpoint.
 func ServeHTTP(service HTTPService, httpAddr string, grpcAddr string, enableCORS bool, opts []g.DialOption) error {

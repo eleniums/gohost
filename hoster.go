@@ -2,11 +2,7 @@ package gohost
 
 import (
 	"context"
-	"errors"
-	"math"
-	"net/http"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
@@ -80,14 +76,6 @@ func (h *Hoster) AddHTTPGateway(gateway ...func(ctx context.Context, mux *runtim
 
 // ListenAndServe creates and starts the server.
 func (h *Hoster) ListenAndServe() error {
-	// validate parameters
-	if h.Service == nil {
-		return errors.New("gRPC service implementation must be provided")
-	}
-	if h.GRPCAddr == "" {
-		return errors.New("gRPC address must be provided")
-	}
-
 	// serve debug endpoint
 	h.serveDebug()
 
@@ -104,70 +92,4 @@ func (h *Hoster) ListenAndServe() error {
 // IsTLSEnabled will return true if TLS properties are set and ready to use.
 func (h *Hoster) IsTLSEnabled() bool {
 	return h.CertFile != "" && h.KeyFile != ""
-}
-
-// serveGRPC will start the gRPC endpoint.
-func (h *Hoster) serveGRPC() error {
-	// configure server options
-	serverOpts := []grpc.ServerOption{
-		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
-		grpc.MaxRecvMsgSize(h.MaxRecvMsgSize),
-	}
-
-	// add interceptors
-	if len(h.UnaryInterceptors) > 0 {
-		unaryInterceptorChain := grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(h.UnaryInterceptors...))
-		serverOpts = append(serverOpts, unaryInterceptorChain)
-	}
-	if len(h.StreamInterceptors) > 0 {
-		streamInterceptorChain := grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(h.StreamInterceptors...))
-		serverOpts = append(serverOpts, streamInterceptorChain)
-	}
-
-	// start the gRPC endpoint
-	if h.IsTLSEnabled() {
-		return gogrpc.ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
-	}
-
-	return gogrpc.ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
-}
-
-// serveHTTP will start the HTTP endpoint.
-func (h *Hoster) serveHTTP() error {
-	// check if HTTP endpoint is enabled
-	if h.HTTPAddr != "" {
-		// ensure interface is implemented
-		httpService, ok := h.Service.(gohttp.HTTPService)
-		if !ok {
-			return errors.New("service does not implement HTTP interface")
-		}
-
-		// configure dial options
-		dialOpts := []grpc.DialOption{
-			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
-		}
-
-		// start the HTTP endpoint
-		if h.IsTLSEnabled() {
-			go func() {
-				gohttp.ServeHTTPWithTLS(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify)
-			}()
-		} else {
-			go func() {
-				gohttp.ServeHTTP(httpService, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
-			}()
-		}
-	}
-
-	return nil
-}
-
-// serveDebug will start the debug endpoint.
-func (h *Hoster) serveDebug() {
-	// check if debug endpoint is enabled
-	if h.DebugAddr != "" {
-		go func() {
-			http.ListenAndServe(h.DebugAddr, nil)
-		}()
-	}
 }

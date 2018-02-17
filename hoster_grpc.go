@@ -9,6 +9,32 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// serveGRPC will start the gRPC endpoint.
+func (h *Hoster) serveGRPC() error {
+	// configure server options
+	serverOpts := []grpc.ServerOption{
+		grpc.MaxSendMsgSize(h.MaxSendMsgSize),
+		grpc.MaxRecvMsgSize(h.MaxRecvMsgSize),
+	}
+
+	// add interceptors
+	if len(h.UnaryInterceptors) > 0 {
+		unaryInterceptorChain := grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(h.UnaryInterceptors...))
+		serverOpts = append(serverOpts, unaryInterceptorChain)
+	}
+	if len(h.StreamInterceptors) > 0 {
+		streamInterceptorChain := grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(h.StreamInterceptors...))
+		serverOpts = append(serverOpts, streamInterceptorChain)
+	}
+
+	// start the gRPC endpoint
+	if h.IsTLSEnabled() {
+		return gogrpc.ServeGRPCWithTLS(h.Service, h.GRPCAddr, serverOpts, h.CertFile, h.KeyFile)
+	}
+
+	return gogrpc.ServeGRPC(h.Service, h.GRPCAddr, serverOpts)
+}
+
 // ServeGRPC starts a gRPC endpoint for the given service.
 func ServeGRPC(service GRPCService, grpcAddr string, opts []rpc.ServerOption) error {
 	// validate parameters
