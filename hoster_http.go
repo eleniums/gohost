@@ -26,66 +26,31 @@ func (h *Hoster) serveHTTP() error {
 		return errors.New("http address cannot be empty")
 	}
 
-	// check if HTTP endpoint is enabled
-	if h.HTTPAddr != "" {
-		// configure dial options
-		dialOpts := []grpc.DialOption{
-			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
-		}
-
-		// start the HTTP endpoint
-		if h.IsTLSEnabled() {
-			go func() {
-				ServeHTTPWithTLS(h.httpEndpoints, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts, h.CertFile, h.KeyFile, h.InsecureSkipVerify)
-			}()
-		} else {
-			go func() {
-				ServeHTTP(h.httpEndpoints, h.HTTPAddr, h.GRPCAddr, h.EnableCORS, dialOpts)
-			}()
-		}
+	// configure dial options
+	opts := []grpc.DialOption{
+		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
 	}
 
-	return nil
-}
+	if h.IsTLSEnabled() {
+		// add TLS credentials
+		creds := credentials.NewTLS(&tls.Config{
+			InsecureSkipVerify: h.InsecureSkipVerify,
+		})
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	} else {
+		// add insecure option
+		opts = append(opts, grpc.WithInsecure())
+	}
 
-// ServeHTTP starts an HTTP endpoint for a given service. This is a gateway pointing to a gRPC endpoint.
-func ServeHTTP(gateways []httpGateway, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption) error {
-	// do not use TLS
-	opts = append(opts, grpc.WithInsecure())
-
-	// start server
-	return serveHTTPInternal(gateways, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
-		return http.ListenAndServe(addr, handler)
-	})
-}
-
-// ServeHTTPWithTLS starts an HTTP endpoint for a given service with TLS enabled. This is a gateway pointing to a gRPC endpoint.
-func ServeHTTPWithTLS(gateways []httpGateway, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, certFile string, keyFile string, insecureSkipVerify bool) error {
-	// create TLS credentials
-	creds := credentials.NewTLS(&tls.Config{
-		InsecureSkipVerify: insecureSkipVerify,
-	})
-
-	// add TLS credentials to options
-	opts = append(opts, grpc.WithTransportCredentials(creds))
-
-	// start server
-	return serveHTTPInternal(gateways, httpAddr, grpcAddr, enableCORS, opts, func(addr string, handler http.Handler) error {
-		return http.ListenAndServeTLS(addr, certFile, keyFile, handler)
-	})
-}
-
-// serveHTTPInternal is an internal method for serving up an HTTP endpoint.
-func serveHTTPInternal(gateways []httpGateway, httpAddr string, grpcAddr string, enableCORS bool, opts []grpc.DialOption, listenAndServe func(addr string, handler http.Handler) error) error {
 	// create context
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// register server
+	// register servers
 	mux := runtime.NewServeMux()
-	for i := range gateways {
-		err := gateways[i](ctx, mux, grpcAddr, opts)
+	for i := range h.httpEndpoints {
+		err := h.httpEndpoints[i](ctx, mux, h.GRPCAddr, opts)
 		if err != nil {
 			return fmt.Errorf("failed to register HTTP handler: %v", err)
 		}
@@ -93,10 +58,14 @@ func serveHTTPInternal(gateways []httpGateway, httpAddr string, grpcAddr string,
 
 	// enable CORS if requested
 	var handler http.Handler = mux
-	if enableCORS {
+	if h.EnableCORS {
 		handler = cors.AllowAll().Handler(mux)
 	}
 
-	// start server
-	return listenAndServe(httpAddr, handler)
+	// start the HTTP endpoint
+	if h.IsTLSEnabled() {
+		return http.ListenAndServeTLS(h.HTTPAddr, h.CertFile, h.KeyFile, handler)
+	}
+
+	return http.ListenAndServe(h.HTTPAddr, handler)
 }

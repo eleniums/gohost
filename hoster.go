@@ -77,10 +77,12 @@ func (h *Hoster) ListenAndServe() error {
 	h.serveDebug()
 
 	// serve HTTP endpoint
-	err := h.serveHTTP()
-	if err != nil {
-		return err
-	}
+	go func() {
+		h.serveHTTP()
+	}()
+	// if err != nil {
+	// 	return err
+	// }
 
 	// serve gRPC endpoint
 	return h.serveGRPC()
