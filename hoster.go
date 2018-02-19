@@ -5,6 +5,9 @@ import (
 )
 
 const (
+	// DefaultDebugAddr is the default address for the debug endpoint (/debug/pprof and /debug/vars).
+	DefaultDebugAddr = "127.0.0.1:6060"
+
 	// DefaultMaxSendMsgSize is the default max send message size, per gRPC
 	DefaultMaxSendMsgSize = 1024 * 1024 * 4
 
@@ -20,7 +23,7 @@ type Hoster struct {
 	// HTTPAddr is the endpoint (host and port) on which to host the HTTP services. May be left blank if not using HTTP.
 	HTTPAddr string
 
-	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). May be left blank to disable debug endpoint.
+	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). Default is 127.0.0.1:6060.
 	DebugAddr string
 
 	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.
@@ -34,6 +37,9 @@ type Hoster struct {
 
 	// EnableCORS will enable all cross-origin resource sharing if set to true.
 	EnableCORS bool
+
+	// EnableDebug will enable the debug endpoint (/debug/pprof and /debug/vars). The debug endpoint address is defined by DebugAddr.
+	EnableDebug bool
 
 	// MaxSendMsgSize will change the size of the message that can be sent from the service.
 	MaxSendMsgSize int
@@ -54,6 +60,7 @@ type Hoster struct {
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
 func NewHoster() *Hoster {
 	return &Hoster{
+		DebugAddr:      DefaultDebugAddr,
 		MaxSendMsgSize: DefaultMaxSendMsgSize,
 		MaxRecvMsgSize: DefaultMaxRecvMsgSize,
 	}
@@ -70,17 +77,21 @@ func (h *Hoster) AddHTTPGateway(gateway ...httpGateway) {
 // ListenAndServe creates and starts the server.
 func (h *Hoster) ListenAndServe() error {
 	// serve debug endpoint
-	go func() {
-		h.serveDebug()
-	}()
+	if h.EnableDebug {
+		go func() {
+			h.serveDebug()
+		}()
+	}
 
 	// serve HTTP endpoint
-	go func() {
-		h.serveHTTP()
-	}()
-	// if err != nil {
-	// 	return err
-	// }
+	if len(h.httpEndpoints) > 0 {
+		go func() {
+			h.serveHTTP()
+		}()
+		// if err != nil {
+		// 	return err
+		// }
+	}
 
 	// serve gRPC endpoint
 	return h.serveGRPC()
