@@ -96,8 +96,3 @@ func (h *Hoster) ListenAndServe() error {
 	// serve gRPC endpoint
 	return h.serveGRPC()
 }
-
-// IsTLSEnabled will return true if TLS properties are set and ready to use.
-func (h *Hoster) IsTLSEnabled() bool {
-	return h.CertFile != "" && h.KeyFile != ""
-}

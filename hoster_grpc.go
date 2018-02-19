@@ -39,7 +39,7 @@ func (h *Hoster) serveGRPC() error {
 	}
 
 	// start the gRPC endpoint
-	if h.IsTLSEnabled() {
+	if h.isTLSEnabled() {
 		// create TLS credentials
 		creds, err := credentials.NewServerTLSFromFile(h.CertFile, h.KeyFile)
 		if err != nil {
@@ -64,4 +64,9 @@ func (h *Hoster) serveGRPC() error {
 
 	// start servers
 	return grpcServer.Serve(lis)
+}
+
+// isTLSEnabled will return true if TLS properties are set and ready to use.
+func (h *Hoster) isTLSEnabled() bool {
+	return h.CertFile != "" && h.KeyFile != ""
 }

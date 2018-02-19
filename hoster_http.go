@@ -31,7 +31,7 @@ func (h *Hoster) serveHTTP() error {
 		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
 	}
 
-	if h.IsTLSEnabled() {
+	if h.isTLSEnabled() {
 		// add TLS credentials
 		creds := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: h.InsecureSkipVerify,
@@ -63,7 +63,7 @@ func (h *Hoster) serveHTTP() error {
 	}
 
 	// start the HTTP endpoint
-	if h.IsTLSEnabled() {
+	if h.isTLSEnabled() {
 		return http.ListenAndServeTLS(h.HTTPAddr, h.CertFile, h.KeyFile, handler)
 	}
 
