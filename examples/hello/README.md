@@ -20,9 +20,9 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
 
 ## Test the gRPC endpoint with the command-line client
 - Insecure
-    - `go run cmd/cli/main.go -insecure -name eleniums`
+    - `go run cmd/client/main.go -insecure -name eleniums`
 - With TLS
-    - `go run cmd/cli/main.go -insecure-skip-verify -name eleniums`
+    - `go run cmd/client/main.go -insecure-skip-verify -name eleniums`
 
 ## Test the HTTP endpoint with curl
 - Insecure
