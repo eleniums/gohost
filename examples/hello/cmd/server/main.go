@@ -42,7 +42,7 @@ func main() {
 	hoster.MaxRecvMsgSize = *maxRecvMsgSize
 
 	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
-		log.Printf("Registered grpc server at: %v", *grpcAddr)
+		log.Printf("Registered gRPC endpoint at: %v", *grpcAddr)
 		pb.RegisterHelloServiceServer(s, service)
 	})
 
