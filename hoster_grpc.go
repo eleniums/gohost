@@ -13,9 +13,6 @@ import (
 // serveGRPC will start the gRPC endpoint.
 func (h *Hoster) serveGRPC() error {
 	// validate parameters
-	if len(h.grpcEndpoints) == 0 {
-		return errors.New("no grpc servers added")
-	}
 	if h.GRPCAddr == "" {
 		return errors.New("grpc address cannot be empty")
 	}

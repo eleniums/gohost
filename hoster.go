@@ -7,6 +7,12 @@ import (
 )
 
 const (
+	// DefaultGRPCAddr is the default address for the gRPC endpoint.
+	DefaultGRPCAddr = "127.0.0.1:50051"
+
+	// DefaultHTTPAddr is the default address for the HTTP endpoint.
+	DefaultHTTPAddr = "127.0.0.1:9090"
+
 	// DefaultDebugAddr is the default address for the debug endpoint (/debug/pprof and /debug/vars).
 	DefaultDebugAddr = "127.0.0.1:6060"
 
@@ -25,13 +31,13 @@ type HTTPHandler func(ctx context.Context, mux *runtime.ServeMux, endpoint strin
 
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
-	// GRPCAddr is the endpoint (host and port) on which to host the gRPC services.
+	// GRPCAddr is the endpoint (host and port) on which to host the gRPC services. Default is 127.0.0.1:50051. May be left blank if no gRPC endpoints have been registered.
 	GRPCAddr string
 
-	// HTTPAddr is the endpoint (host and port) on which to host the HTTP services. May be left blank if not using HTTP.
+	// HTTPAddr is the endpoint (host and port) on which to host the HTTP services. Default is 127.0.0.1:9090. May be left blank if no HTTP handlers have been registered.
 	HTTPAddr string
 
-	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). Default is 127.0.0.1:6060.
+	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). Default is 127.0.0.1:6060. May be left blank if EnableDebug is false.
 	DebugAddr string
 
 	// CertFile is the certificate file for use with TLS. May be left blank if using insecure mode.
@@ -71,6 +77,8 @@ type Hoster struct {
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
 func NewHoster() *Hoster {
 	return &Hoster{
+		GRPCAddr:       DefaultGRPCAddr,
+		HTTPAddr:       DefaultHTTPAddr,
 		DebugAddr:      DefaultDebugAddr,
 		MaxSendMsgSize: DefaultMaxSendMsgSize,
 		MaxRecvMsgSize: DefaultMaxRecvMsgSize,
@@ -89,23 +97,28 @@ func (h *Hoster) RegisterHTTPHandler(handlers ...HTTPHandler) {
 
 // ListenAndServe creates and starts the server.
 func (h *Hoster) ListenAndServe() error {
+	errc := make(chan error)
+
 	// serve debug endpoint
 	if h.EnableDebug {
 		go func() {
-			h.serveDebug()
+			errc <- h.serveDebug()
 		}()
 	}
 
 	// serve HTTP endpoint
 	if len(h.httpHandlers) > 0 {
 		go func() {
-			h.serveHTTP()
+			errc <- h.serveHTTP()
 		}()
-		// if err != nil {
-		// 	return err
-		// }
 	}
 
 	// serve gRPC endpoint
-	return h.serveGRPC()
+	if len(h.grpcEndpoints) > 0 {
+		go func() {
+			errc <- h.serveGRPC()
+		}()
+	}
+
+	return <-errc
 }
