@@ -18,7 +18,7 @@ import (
 func (h *Hoster) serveHTTP() error {
 	// validate parameters
 	if len(h.httpHandlers) == 0 {
-		return errors.New("no http gateways added")
+		return errors.New("no http handlers added")
 	}
 	if h.HTTPAddr == "" {
 		return errors.New("http address cannot be empty")
