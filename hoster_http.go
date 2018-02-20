@@ -14,12 +14,10 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-type httpGateway func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
-
 // serveHTTP will start the HTTP endpoint.
 func (h *Hoster) serveHTTP() error {
 	// validate parameters
-	if len(h.httpEndpoints) == 0 {
+	if len(h.httpHandlers) == 0 {
 		return errors.New("no http gateways added")
 	}
 	if h.HTTPAddr == "" {
@@ -49,8 +47,8 @@ func (h *Hoster) serveHTTP() error {
 
 	// register servers
 	mux := runtime.NewServeMux()
-	for i := range h.httpEndpoints {
-		err := h.httpEndpoints[i](ctx, mux, h.GRPCAddr, opts)
+	for i := range h.httpHandlers {
+		err := h.httpHandlers[i](ctx, mux, h.GRPCAddr, opts)
 		if err != nil {
 			return fmt.Errorf("failed to register HTTP handler: %v", err)
 		}

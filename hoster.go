@@ -1,6 +1,9 @@
 package gohost
 
 import (
+	"context"
+
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 )
 
@@ -14,6 +17,12 @@ const (
 	// DefaultMaxRecvMsgSize is the default max receive message size, per gRPC
 	DefaultMaxRecvMsgSize = 1024 * 1024 * 4
 )
+
+// GRPCEndpoint is used to register a gRPC endpoint.
+type GRPCEndpoint func(s *grpc.Server)
+
+// HTTPHandler is used to register a HTTP handler for forwarding requests to a gRPC endpoint.
+type HTTPHandler func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
@@ -53,8 +62,11 @@ type Hoster struct {
 	// StreamInterceptors is an array of stream interceptors to be used by the service. They will be executed in order, from first to last.
 	StreamInterceptors []grpc.StreamServerInterceptor
 
-	grpcEndpoints []grpcServer
-	httpEndpoints []httpGateway
+	// grpcEndpoints is an array of gRPC endpoints to be hosted.
+	grpcEndpoints []GRPCEndpoint
+
+	// httpHandlers is an array of HTTP handlers to be hosted.
+	httpHandlers []HTTPHandler
 }
 
 // NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
@@ -66,12 +78,14 @@ func NewHoster() *Hoster {
 	}
 }
 
-func (h *Hoster) AddGRPCEndpoint(endpoint ...grpcServer) {
-	h.grpcEndpoints = append(h.grpcEndpoints, endpoint...)
+// RegisterGRPCEndpoint will add a function for registering a gRPC endpoint. The function is invoked when ListenAndServe is called.
+func (h *Hoster) RegisterGRPCEndpoint(endpoints ...GRPCEndpoint) {
+	h.grpcEndpoints = append(h.grpcEndpoints, endpoints...)
 }
 
-func (h *Hoster) AddHTTPGateway(gateway ...httpGateway) {
-	h.httpEndpoints = append(h.httpEndpoints, gateway...)
+// RegisterHTTPHandler will add a function for registering a HTTP handler. The function is invoked when ListenAndServe is called.
+func (h *Hoster) RegisterHTTPHandler(handlers ...HTTPHandler) {
+	h.httpHandlers = append(h.httpHandlers, handlers...)
 }
 
 // ListenAndServe creates and starts the server.
@@ -84,7 +98,7 @@ func (h *Hoster) ListenAndServe() error {
 	}
 
 	// serve HTTP endpoint
-	if len(h.httpEndpoints) > 0 {
+	if len(h.httpHandlers) > 0 {
 		go func() {
 			h.serveHTTP()
 		}()

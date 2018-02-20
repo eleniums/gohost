@@ -10,8 +10,6 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-type grpcServer func(s *grpc.Server)
-
 // serveGRPC will start the gRPC endpoint.
 func (h *Hoster) serveGRPC() error {
 	// validate parameters
@@ -57,13 +55,13 @@ func (h *Hoster) serveGRPC() error {
 	}
 
 	// register servers
-	grpcServer := grpc.NewServer(opts...)
+	server := grpc.NewServer(opts...)
 	for i := range h.grpcEndpoints {
-		h.grpcEndpoints[i](grpcServer)
+		h.grpcEndpoints[i](server)
 	}
 
 	// start servers
-	return grpcServer.Serve(lis)
+	return server.Serve(lis)
 }
 
 // isTLSEnabled will return true if TLS properties are set and ready to use.
