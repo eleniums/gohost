@@ -1,4 +1,4 @@
-package gohost
+package test
 
 import (
 	"bytes"
