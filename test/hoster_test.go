@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eleniums/gohost"
 	"github.com/eleniums/gohost/examples/test"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -47,7 +48,7 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 
 	expectedValue := "test"
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 
 	// act - start the service
 	go hoster.ListenAndServe()
@@ -77,7 +78,7 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint_WithTLS(t *testing.T) {
 
 	expectedValue := "test"
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.CertFile = "./testdata/test.crt"
 	hoster.KeyFile = "./testdata/test.key"
 
@@ -110,7 +111,7 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 
 	expectedValue := "test"
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.HTTPAddr = httpAddr
 
 	// act - start the service
@@ -146,7 +147,7 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 
 	expectedValue := "test"
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.HTTPAddr = httpAddr
 	hoster.CertFile = "./testdata/test.crt"
 	hoster.KeyFile = "./testdata/test.key"
@@ -188,7 +189,7 @@ func Test_Hoster_ListenAndServe_DebugEndpoint_Pprof(t *testing.T) {
 	debugAddr := getAddr(t)
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.DebugAddr = debugAddr
 
 	// act - start the service
@@ -218,7 +219,7 @@ func Test_Hoster_ListenAndServe_DebugEndpoint_Vars(t *testing.T) {
 	debugAddr := getAddr(t)
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.DebugAddr = debugAddr
 
 	// act - start the service
@@ -242,45 +243,11 @@ func Test_Hoster_ListenAndServe_DebugEndpoint_Vars(t *testing.T) {
 	assert.NotEmpty(t, body)
 }
 
-func Test_Hoster_ListenAndServe_Logger(t *testing.T) {
-	// arrange
-	service := test.NewService()
-	grpcAddr := getAddr(t)
-
-	expectedValue := "test"
-
-	hoster := NewHoster(service, grpcAddr)
-
-	loggedValue := ""
-	hoster.Logger = func(format string, v ...interface{}) {
-		loggedValue = fmt.Sprintf(format, v...)
-	}
-
-	// act - start the service
-	go hoster.ListenAndServe()
-
-	// make sure service has time to start
-	time.Sleep(serviceStartDelay)
-
-	// call the service at the gRPC endpoint
-	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
-	assert.NoError(t, err)
-	client := pb.NewTestServiceClient(conn)
-	grpcReq := pb.SendRequest{
-		Value: expectedValue,
-	}
-	_, err = client.Echo(context.Background(), &grpcReq)
-
-	// assert
-	assert.NoError(t, err)
-	assert.NotEmpty(t, loggedValue)
-}
-
 func Test_Hoster_ListenAndServe_NilService(t *testing.T) {
 	// arrange
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(nil, grpcAddr)
+	hoster := gohost.NewHoster()
 
 	// act - start the service
 	err := hoster.ListenAndServe()
@@ -293,7 +260,7 @@ func Test_Hoster_ListenAndServe_EmptyGRPCAddress(t *testing.T) {
 	// arrange
 	service := test.NewService()
 
-	hoster := NewHoster(service, "")
+	hoster := gohost.NewHoster()
 
 	// act - start the service
 	err := hoster.ListenAndServe()
@@ -308,7 +275,7 @@ func Test_Hoster_ListenAndServe_DoesNotImplementHTTPInterface(t *testing.T) {
 	grpcAddr := getAddr(t)
 	httpAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.HTTPAddr = httpAddr
 
 	// act - start the service
@@ -325,7 +292,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 
 	largeValue := string(make([]byte, largeMessageLength))
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.MaxRecvMsgSize = math.MaxInt32
 
 	// act - start the service
@@ -356,7 +323,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
 
 	largeValue := string(make([]byte, largeMessageLength))
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.MaxRecvMsgSize = 1
 
 	// act - start the service
@@ -387,7 +354,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
 
 	largeValue := string(make([]byte, largeMessageLength))
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.HTTPAddr = httpAddr
 
 	// act - start the service
@@ -426,7 +393,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Pass(t *testing.T) {
 	service := test.NewService()
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.MaxSendMsgSize = math.MaxInt32
 
 	// act - start the service
@@ -455,7 +422,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Fail(t *testing.T) {
 	service := test.NewService()
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.MaxSendMsgSize = 1
 
 	// act - start the service
@@ -484,7 +451,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Pass(t *testing.T) {
 	httpAddr := getAddr(t)
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.HTTPAddr = httpAddr
 	hoster.MaxSendMsgSize = math.MaxInt32
 
@@ -520,7 +487,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Fail(t *testing.T) {
 	httpAddr := getAddr(t)
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 	hoster.HTTPAddr = httpAddr
 	hoster.MaxSendMsgSize = 1
 
@@ -548,7 +515,7 @@ func Test_Hoster_ListenAndServe_UnaryInterceptor(t *testing.T) {
 
 	expectedValue := "test"
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 
 	count := 1
 	hoster.UnaryInterceptors = append(hoster.UnaryInterceptors, func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
@@ -593,7 +560,7 @@ func Test_Hoster_ListenAndServe_StreamInterceptor(t *testing.T) {
 	service := test.NewService()
 	grpcAddr := getAddr(t)
 
-	hoster := NewHoster(service, grpcAddr)
+	hoster := gohost.NewHoster()
 
 	count := 1
 	hoster.StreamInterceptors = append(hoster.StreamInterceptors, func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
