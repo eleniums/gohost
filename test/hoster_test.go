@@ -2,8 +2,12 @@ package test
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"flag"
+	"fmt"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -44,7 +48,6 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-
 	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
@@ -79,12 +82,12 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint_WithTLS(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.CertFile = "./testdata/test.crt"
-	hoster.KeyFile = "./testdata/test.key"
-
 	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
+
+	hoster.CertFile = "./testdata/test.crt"
+	hoster.KeyFile = "./testdata/test.key"
 
 	// act - start the service
 	go hoster.ListenAndServe()
@@ -107,41 +110,47 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint_WithTLS(t *testing.T) {
 	assert.Equal(t, expectedValue, grpcResp.Echo)
 }
 
-// func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
-// 	// arrange
-// 	service := test.NewService()
-// 	httpAddr := getAddr(t)
-// 	grpcAddr := getAddr(t)
+func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
+	// arrange
+	service := test.NewService()
+	httpAddr := getAddr(t)
+	grpcAddr := getAddr(t)
 
-// 	expectedValue := "test"
+	expectedValue := "test"
 
-// 	hoster := gohost.NewHoster()
-// 	hoster.HTTPAddr = httpAddr
+	hoster := gohost.NewHoster()
+	hoster.GRPCAddr = grpcAddr
+	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+		pb.RegisterTestServiceServer(s, service)
+	})
 
-// 	// act - start the service
-// 	go hoster.ListenAndServe()
+	hoster.HTTPAddr = httpAddr
+	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
 
-// 	// make sure service has time to start
-// 	time.Sleep(serviceStartDelay)
+	// act - start the service
+	go hoster.ListenAndServe()
 
-// 	// call the service at the HTTP endpoint
-// 	httpClient := http.Client{
-// 		Timeout: httpClientTimeout,
-// 	}
-// 	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value=%v", httpAddr, expectedValue), nil)
-// 	assert.NoError(t, err)
-// 	doResp, err := httpClient.Do(httpReq)
-// 	assert.NoError(t, err)
-// 	body, err := ioutil.ReadAll(doResp.Body)
-// 	assert.NoError(t, err)
-// 	httpResp := pb.EchoResponse{}
-// 	err = json.Unmarshal(body, &httpResp)
+	// make sure service has time to start
+	time.Sleep(serviceStartDelay)
 
-// 	// assert
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, httpResp)
-// 	assert.Equal(t, expectedValue, httpResp.Echo)
-// }
+	// call the service at the HTTP endpoint
+	httpClient := http.Client{
+		Timeout: httpClientTimeout,
+	}
+	httpReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/v1/echo?value=%v", httpAddr, expectedValue), nil)
+	assert.NoError(t, err)
+	doResp, err := httpClient.Do(httpReq)
+	assert.NoError(t, err)
+	body, err := ioutil.ReadAll(doResp.Body)
+	assert.NoError(t, err)
+	httpResp := pb.EchoResponse{}
+	err = json.Unmarshal(body, &httpResp)
+
+	// assert
+	assert.NoError(t, err)
+	assert.NotNil(t, httpResp)
+	assert.Equal(t, expectedValue, httpResp.Echo)
+}
 
 // func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 // 	// arrange
