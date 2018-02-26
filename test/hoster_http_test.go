@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	h "net/http"
 	"testing"
 	"time"
@@ -304,13 +303,4 @@ func Test_ServeHTTPWithTLS_FailListen(t *testing.T) {
 
 	// assert
 	assert.Error(t, err)
-}
-
-// getAddr is a helper function that will retrieve a 127.0.0.1 address with an open port.
-func getAddr(t *testing.T) string {
-	lis, err := net.Listen("tcp", "127.0.0.1:0")
-	assert.NoError(t, err)
-	defer lis.Close()
-
-	return lis.Addr().String()
 }
