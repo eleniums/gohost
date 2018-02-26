@@ -74,7 +74,7 @@ type Hoster struct {
 	httpHandlers []HTTPHandler
 }
 
-// NewHoster creates a new hoster instance with defaults set. This is the minimum required to host a server.
+// NewHoster creates a new hoster instance with defaults set.
 func NewHoster() *Hoster {
 	return &Hoster{
 		GRPCAddr:       DefaultGRPCAddr,
