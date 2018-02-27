@@ -3,9 +3,7 @@ package test
 import (
 	"io"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 
 	pb "github.com/eleniums/gohost/examples/test/proto"
 )
@@ -52,14 +50,4 @@ func (s *Service) Stream(stream pb.TestService_StreamServer) error {
 			return err
 		}
 	}
-}
-
-// RegisterServer registers the gRPC server to use with a service.
-func (s *Service) RegisterServer(grpc *grpc.Server) {
-	pb.RegisterTestServiceServer(grpc, s)
-}
-
-// RegisterHandler registers the HTTP handler to use with a service.
-func (s *Service) RegisterHandler(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
-	return pb.RegisterTestServiceHandlerFromEndpoint(ctx, mux, endpoint, opts)
 }

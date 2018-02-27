@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -23,7 +22,7 @@ func (h *Hoster) serveHTTP() error {
 
 	// configure dial options
 	opts := []grpc.DialOption{
-		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32), grpc.MaxCallRecvMsgSize(math.MaxInt32)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(h.MaxSendMsgSize), grpc.MaxCallRecvMsgSize(h.MaxRecvMsgSize)),
 	}
 
 	if h.isTLSEnabled() {
