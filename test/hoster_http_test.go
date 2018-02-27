@@ -19,7 +19,7 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
-func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
+func Test_Hoster_ListenAndServe_HTTP_Successful(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	httpAddr := getAddr(t)
@@ -61,7 +61,7 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint(t *testing.T) {
 	assert.Equal(t, expectedValue, httpResp.Echo)
 }
 
-func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
+func Test_Hoster_ListenAndServe_HTTP_WithTLS(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	httpAddr := getAddr(t)
@@ -112,7 +112,7 @@ func Test_Hoster_ListenAndServe_HTTPEndpoint_WithTLS(t *testing.T) {
 	assert.Equal(t, expectedValue, httpResp.Echo)
 }
 
-func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
+func Test_Hoster_ListenAndServe_HTTP_MaxRecvMsgSize_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	httpAddr := getAddr(t)
@@ -162,7 +162,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Pass(t *testing.T) {
 	assert.True(t, httpResp.Success)
 }
 
-func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Fail(t *testing.T) {
+func Test_Hoster_ListenAndServe_HTTP_MaxRecvMsgSize_Fail(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	httpAddr := getAddr(t)
@@ -212,7 +212,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_HTTP_Fail(t *testing.T) {
 	assert.False(t, httpResp.Success)
 }
 
-func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Pass(t *testing.T) {
+func Test_Hoster_ListenAndServe_HTTP_MaxSendMsgSize_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	httpAddr := getAddr(t)
@@ -255,7 +255,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Pass(t *testing.T) {
 	assert.Equal(t, largeMessageLength, len(httpResp.Echo))
 }
 
-func Test_Hoster_ListenAndServe_MaxSendMsgSize_HTTP_Fail(t *testing.T) {
+func Test_Hoster_ListenAndServe_HTTP_MaxSendMsgSize_Fail(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	httpAddr := getAddr(t)

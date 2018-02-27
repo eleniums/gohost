@@ -16,7 +16,7 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
-func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_Successful(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
@@ -50,7 +50,7 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint(t *testing.T) {
 	assert.Equal(t, expectedValue, grpcResp.Echo)
 }
 
-func Test_Hoster_ListenAndServe_GRPCEndpoint_WithTLS(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_WithTLS(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
@@ -87,7 +87,7 @@ func Test_Hoster_ListenAndServe_GRPCEndpoint_WithTLS(t *testing.T) {
 	assert.Equal(t, expectedValue, grpcResp.Echo)
 }
 
-func Test_Hoster_ListenAndServe_EmptyGRPCAddress(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_EmptyAddress(t *testing.T) {
 	// arrange
 	service := test.NewService()
 
@@ -104,7 +104,7 @@ func Test_Hoster_ListenAndServe_EmptyGRPCAddress(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_MaxRecvMsgSize_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
@@ -140,7 +140,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Pass(t *testing.T) {
 	assert.True(t, grpcResp.Success)
 }
 
-func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_MaxRecvMsgSize_Fail(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
@@ -175,7 +175,7 @@ func Test_Hoster_ListenAndServe_MaxRecvMsgSize_GRPC_Fail(t *testing.T) {
 	assert.Nil(t, grpcResp)
 }
 
-func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Pass(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_MaxSendMsgSize_Pass(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
@@ -209,7 +209,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Pass(t *testing.T) {
 	assert.Equal(t, largeMessageLength, len(grpcResp.Echo))
 }
 
-func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Fail(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_MaxSendMsgSize_Fail(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
@@ -242,7 +242,7 @@ func Test_Hoster_ListenAndServe_MaxSendMsgSize_GRPC_Fail(t *testing.T) {
 	assert.Nil(t, grpcResp)
 }
 
-func Test_Hoster_ListenAndServe_UnaryInterceptor(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_UnaryInterceptor(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
@@ -293,7 +293,7 @@ func Test_Hoster_ListenAndServe_UnaryInterceptor(t *testing.T) {
 	assert.Equal(t, expectedValue, grpcResp.Echo)
 }
 
-func Test_Hoster_ListenAndServe_StreamInterceptor(t *testing.T) {
+func Test_Hoster_ListenAndServe_GRPC_StreamInterceptor(t *testing.T) {
 	// arrange
 	service := test.NewService()
 	grpcAddr := getAddr(t)
