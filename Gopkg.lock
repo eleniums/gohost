@@ -8,7 +8,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/golang/protobuf"
   packages = [
     "jsonpb",
@@ -20,13 +19,14 @@
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "0a4f71a498b7c4812f64969510bcb4eca251e33a"
+  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
   packages = ["."]
-  revision = "f63a7dfb64c138bd93d5c5b896d8b33c4b08e000"
+  revision = "eb23b08d08bbe930113a6512a7a829050341448c"
 
 [[projects]]
   name = "github.com/grpc-ecosystem/grpc-gateway"
@@ -47,8 +47,8 @@
 [[projects]]
   name = "github.com/rs/cors"
   packages = ["."]
-  revision = "8dd4211afb5d08dbb39a533b9bb9e4b486351df6"
-  version = "v1.1"
+  revision = "feef513b9575b32f84bafa580aad89b011259019"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -56,14 +56,14 @@
     "assert",
     "require"
   ]
-  revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
-  version = "v1.1.4"
+  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
+  version = "v1.2.1"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "golang.org/x/net/context",
+    "context",
     "http2",
     "http2/hpack",
     "idna",
@@ -71,15 +71,19 @@
     "lex/httplex",
     "trace"
   ]
-  revision = "02ac38e2528ff4adea90f184d71a3faa04b4b1b0"
+  revision = "22ae77b79946ea320088417e4d50825671d82d57"
 
 [[projects]]
-  branch = "master"
   name = "golang.org/x/text"
   packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
     "internal/gen",
+    "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "language",
     "secure/bidirule",
     "transform",
     "unicode/bidi",
@@ -87,7 +91,8 @@
     "unicode/norm",
     "unicode/rangetable"
   ]
-  revision = "836efe42bb4aa16aaa17b9c155d8813d336ed720"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
   branch = "master"
@@ -96,7 +101,7 @@
     "googleapis/api/annotations",
     "googleapis/rpc/status"
   ]
-  revision = "b0a3dcfcd1a9bd48e63634bd8802960804cf8315"
+  revision = "2c5e7ac708aaa719366570dd82bda44541ca2a63"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -109,6 +114,7 @@
     "connectivity",
     "credentials",
     "encoding",
+    "encoding/proto",
     "grpclb/grpc_lb_v1/messages",
     "grpclog",
     "internal",
@@ -124,12 +130,12 @@
     "tap",
     "transport"
   ]
-  revision = "6b51017f791ae1cfbec89c52efdf444b13b550ef"
-  version = "v1.9.2"
+  revision = "8e4536a86ab602859c20df5ebfd0bd4228d08655"
+  version = "v1.10.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "539f2594a6e18b7ce68d0d7d76a31f927c6150fc0cb92053d8146caf61b92e87"
+  inputs-digest = "c99abaeb40b84bd21c4b65dda88aae91cb6ac057cdfa636707b3852558c3545f"
   solver-name = "gps-cdcl"
   solver-version = 1
