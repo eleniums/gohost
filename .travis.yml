@@ -14,8 +14,6 @@ before_install:
 install:
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure -v
-  - go generate ./examples/test
-  - go generate ./examples/hello
 
 script:
   - go test -v ./test -service-start-delay 1000ms -http-client-timeout 60000ms
