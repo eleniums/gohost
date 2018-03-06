@@ -36,5 +36,5 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
     - http://127.0.0.1:6060/debug/vars
 
 ## Regenerate client/server from proto
-- Use go:generate to build client/server/swagger:
+- Use go:generate to build client/server and swagger docs:
     - `go generate`
