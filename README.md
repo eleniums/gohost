@@ -21,7 +21,7 @@ dep ensure
 
 ## Example
 
-Service implementing the [grpc_service](https://github.com/eleniums/gohost/blob/master/grpc_service.go) and [http_service](https://github.com/eleniums/gohost/blob/master/http_service.go) interfaces:
+Sample service implementation:
 ```go
 // Service contains the implementation for the gRPC service.
 type Service struct{}
