@@ -45,12 +45,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/rs/cors"
-  packages = ["."]
-  revision = "feef513b9575b32f84bafa580aad89b011259019"
-  version = "v1.3.0"
-
-[[projects]]
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
@@ -71,7 +65,7 @@
     "lex/httplex",
     "trace"
   ]
-  revision = "22ae77b79946ea320088417e4d50825671d82d57"
+  revision = "d25186b37f34ebdbbea8f488ef055638dfab272d"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -101,7 +95,7 @@
     "googleapis/api/annotations",
     "googleapis/rpc/status"
   ]
-  revision = "2c5e7ac708aaa719366570dd82bda44541ca2a63"
+  revision = "df60624c1e9b9d2973e889c7a1cff73155da81c4"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -136,6 +130,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c99abaeb40b84bd21c4b65dda88aae91cb6ac057cdfa636707b3852558c3545f"
+  inputs-digest = "b0abd303f7a09f6e4a7907929e0c1d15dfd2a92d2ccaad8e3f17a5e0ab572c46"
   solver-name = "gps-cdcl"
   solver-version = 1

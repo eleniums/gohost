@@ -1,6 +1,8 @@
 package gohost
 
 import (
+	"net/http"
+
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -49,8 +51,8 @@ type Hoster struct {
 	// InsecureSkipVerify will cause verification of the host name during a TLS handshake to be skipped if set to true.
 	InsecureSkipVerify bool
 
-	// EnableCORS will enable all cross-origin resource sharing if set to true.
-	EnableCORS bool
+	// HTTPHandler is used to register a handler that can optionally be added to the HTTP endpoint. Leave blank to use default mux.
+	HTTPHandler func(mux *runtime.ServeMux) http.Handler
 
 	// EnableDebug will enable the debug endpoint (/debug/pprof and /debug/vars). The debug endpoint address is defined by DebugAddr.
 	EnableDebug bool

@@ -59,7 +59,6 @@ hoster.GRPCAddr = *grpcAddr
 hoster.HTTPAddr = *httpAddr
 hoster.DebugAddr = *debugAddr
 hoster.EnableDebug = *enableDebug
-hoster.EnableCORS = *enableCors
 hoster.CertFile = *certFile
 hoster.KeyFile = *keyFile
 hoster.InsecureSkipVerify = *insecureSkipVerify

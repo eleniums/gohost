@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/rs/cors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -50,10 +49,10 @@ func (h *Hoster) serveHTTP() error {
 		}
 	}
 
-	// enable CORS if requested
+	// register optional handler
 	var handler http.Handler = mux
-	if h.EnableCORS {
-		handler = cors.AllowAll().Handler(mux)
+	if h.HTTPHandler != nil {
+		handler = h.HTTPHandler(mux)
 	}
 
 	// start the HTTP endpoint
