@@ -34,7 +34,7 @@ func Test_Hoster_ListenAndServe_HTTP_Successful(t *testing.T) {
 	})
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	// act - start the service
 	go hoster.ListenAndServe()
@@ -76,7 +76,7 @@ func Test_Hoster_ListenAndServe_HTTP_WithTLS(t *testing.T) {
 	})
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	hoster.CertFile = "./testdata/test.crt"
 	hoster.KeyFile = "./testdata/test.key"
@@ -117,7 +117,7 @@ func Test_Hoster_ListenAndServe_HTTP_EmptyAddress(t *testing.T) {
 	hoster := gohost.NewHoster()
 
 	hoster.HTTPAddr = ""
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	// act - start the service
 	err := hoster.ListenAndServe()
@@ -131,7 +131,7 @@ func Test_Hoster_ListenAndServe_HTTP_InvalidAddress(t *testing.T) {
 	hoster := gohost.NewHoster()
 
 	hoster.HTTPAddr = "badaddress"
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	// act - start the service
 	err := hoster.ListenAndServe()
@@ -146,7 +146,7 @@ func Test_Hoster_ListenAndServe_HTTP_InvalidCertFile(t *testing.T) {
 	httpAddr := getAddr(t)
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	hoster.CertFile = "./testdata/badcert.crt"
 	hoster.KeyFile = "./testdata/test.key"
@@ -164,7 +164,7 @@ func Test_Hoster_ListenAndServe_HTTP_InvalidKeyFile(t *testing.T) {
 	httpAddr := getAddr(t)
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	hoster.CertFile = "./testdata/test.crt"
 	hoster.KeyFile = "./testdata/badkey.key"
@@ -191,7 +191,7 @@ func Test_Hoster_ListenAndServe_HTTP_MaxRecvMsgSize_Pass(t *testing.T) {
 	})
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	hoster.MaxRecvMsgSize = math.MaxInt32
 
@@ -241,7 +241,7 @@ func Test_Hoster_ListenAndServe_HTTP_MaxRecvMsgSize_Fail(t *testing.T) {
 	})
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	hoster.MaxRecvMsgSize = 1
 
@@ -289,7 +289,7 @@ func Test_Hoster_ListenAndServe_HTTP_MaxSendMsgSize_Pass(t *testing.T) {
 	})
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	hoster.MaxSendMsgSize = math.MaxInt32
 
@@ -332,7 +332,7 @@ func Test_Hoster_ListenAndServe_HTTP_MaxSendMsgSize_Fail(t *testing.T) {
 	})
 
 	hoster.HTTPAddr = httpAddr
-	hoster.RegisterHTTPHandler(pb.RegisterTestServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
 	hoster.MaxSendMsgSize = 1
 

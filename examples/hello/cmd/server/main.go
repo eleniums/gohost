@@ -46,7 +46,7 @@ func main() {
 		pb.RegisterHelloServiceServer(s, service)
 	})
 
-	hoster.RegisterHTTPHandler(pb.RegisterHelloServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPEndpoint(pb.RegisterHelloServiceHandlerFromEndpoint)
 
 	// start the server
 	err := hoster.ListenAndServe()

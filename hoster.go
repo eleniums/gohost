@@ -26,15 +26,15 @@ const (
 // GRPCEndpoint is used to register a gRPC endpoint.
 type GRPCEndpoint func(s *grpc.Server)
 
-// HTTPHandler is used to register a HTTP handler for forwarding requests to a gRPC endpoint.
-type HTTPHandler func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+// HTTPEndpoint is used to register a HTTP endpoint for forwarding requests to a gRPC endpoint.
+type HTTPEndpoint func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
 	// GRPCAddr is the endpoint (host and port) on which to host the gRPC services. Default is 127.0.0.1:50051. May be left blank if no gRPC endpoints have been registered.
 	GRPCAddr string
 
-	// HTTPAddr is the endpoint (host and port) on which to host the HTTP services. Default is 127.0.0.1:9090. May be left blank if no HTTP handlers have been registered.
+	// HTTPAddr is the endpoint (host and port) on which to host the HTTP services. Default is 127.0.0.1:9090. May be left blank if no HTTP endpoints have been registered.
 	HTTPAddr string
 
 	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). Default is 127.0.0.1:6060. May be left blank if EnableDebug is false.
@@ -70,8 +70,8 @@ type Hoster struct {
 	// grpcEndpoints is an array of gRPC endpoints to be hosted.
 	grpcEndpoints []GRPCEndpoint
 
-	// httpHandlers is an array of HTTP handlers to be hosted.
-	httpHandlers []HTTPHandler
+	// httpEndpoints is an array of HTTP endpoints to be hosted.
+	httpEndpoints []HTTPEndpoint
 }
 
 // NewHoster creates a new hoster instance with defaults set.
@@ -90,9 +90,9 @@ func (h *Hoster) RegisterGRPCEndpoint(endpoints ...GRPCEndpoint) {
 	h.grpcEndpoints = append(h.grpcEndpoints, endpoints...)
 }
 
-// RegisterHTTPHandler will add a function for registering a HTTP handler. The function is invoked when ListenAndServe is called.
-func (h *Hoster) RegisterHTTPHandler(handlers ...HTTPHandler) {
-	h.httpHandlers = append(h.httpHandlers, handlers...)
+// RegisterHTTPEndpoint will add a function for registering a HTTP endpoint. The function is invoked when ListenAndServe is called.
+func (h *Hoster) RegisterHTTPEndpoint(handlers ...HTTPEndpoint) {
+	h.httpEndpoints = append(h.httpEndpoints, handlers...)
 }
 
 // ListenAndServe creates and starts the server.
@@ -107,7 +107,7 @@ func (h *Hoster) ListenAndServe() error {
 	}
 
 	// serve HTTP endpoint
-	if len(h.httpHandlers) > 0 {
+	if len(h.httpEndpoints) > 0 {
 		go func() {
 			errc <- h.serveHTTP()
 		}()
