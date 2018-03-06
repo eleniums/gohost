@@ -7,8 +7,6 @@ A simple example service that demonstrates how to use a Hoster instance to host 
     - Make sure protoc is in GOPATH/bin
     - Make sure google/protobuf is also in GOPATH/bin
 - Install [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
-    - Install from vendor directory to avoid issues
-        - https://github.com/grpc-ecosystem/grpc-gateway/issues/384#issuecomment-300863457
 
 ## Run the server
 - Insecure
@@ -31,17 +29,12 @@ NOTE: insecure-skip-verify is only used for testing when the host name does not 
     - `curl -k https://127.0.0.1:9090/v1/hello?name=eleniums`
 
 ## Test the debug endpoint
+- Enable the debug endpoint when running the service:
+    - `go run cmd/server/main.go -enable-debug`
 - Navigate to:
     - http://127.0.0.1:6060/debug/pprof
     - http://127.0.0.1:6060/debug/vars
 
-## Generate Stubs
-
-The stubs for this example have already been generated and checked in, so these commands are only provided as a reference.
-
-- Generate gRPC client/server stubs:
-    - `protoc -I. -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --go_out=plugins=grpc:. proto/hello.proto`
-- Generate HTTP gateway:
-    - `protoc -I. -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --grpc-gateway_out=logtostderr=true:. proto/hello.proto`
-- Generate Swagger definitions:
-    - `protoc -I. -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --proto_path=./proto --swagger_out=logtostderr=true:. proto/hello.proto`
+## Regenerate client/server from proto
+- Use go:generate to build client/server/swagger:
+    - `go generate`
