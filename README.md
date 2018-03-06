@@ -21,7 +21,7 @@ dep ensure
 
 ## Example
 
-Service implementing the [grpc_service](https://github.com/eleniums/gohost/blob/master/grpc_service.go) and [http_service](https://github.com/eleniums/gohost/blob/master/http_service.go) interfaces:
+Sample service implementation:
 ```go
 // Service contains the implementation for the gRPC service.
 type Service struct{}
@@ -46,16 +46,6 @@ func (s *Service) Hello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResp
 		Greeting: greeting,
 	}, nil
 }
-
-// RegisterServer registers the gRPC server to use with a service.
-func (s *Service) RegisterServer(grpc *grpc.Server) {
-	pb.RegisterHelloServiceServer(grpc, s)
-}
-
-// RegisterHandler registers the HTTP handler to use with a service.
-func (s *Service) RegisterHandler(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
-	return pb.RegisterHelloServiceHandlerFromEndpoint(ctx, mux, endpoint, opts)
-}
 ```
 
 Use the Hoster struct to serve up gRPC and HTTP endpoints:
@@ -64,16 +54,22 @@ Use the Hoster struct to serve up gRPC and HTTP endpoints:
 service := hello.NewService()
 
 // create the hoster
-hoster := gohost.NewHoster(service, *grpcAddr)
+hoster := gohost.NewHoster()
+hoster.GRPCAddr = *grpcAddr
 hoster.HTTPAddr = *httpAddr
 hoster.DebugAddr = *debugAddr
-hoster.EnableCORS = *enableCors
+hoster.EnableDebug = *enableDebug
 hoster.CertFile = *certFile
 hoster.KeyFile = *keyFile
 hoster.InsecureSkipVerify = *insecureSkipVerify
 hoster.MaxSendMsgSize = *maxSendMsgSize
 hoster.MaxRecvMsgSize = *maxRecvMsgSize
-hoster.Logger = log.Printf
+
+hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	pb.RegisterHelloServiceServer(s, service)
+})
+
+hoster.RegisterHTTPEndpoint(pb.RegisterHelloServiceHandlerFromEndpoint)
 
 // start the server
 err := hoster.ListenAndServe()
@@ -83,10 +79,3 @@ if err != nil {
 ```
 
 See the full example [here](https://github.com/eleniums/gohost/tree/master/examples/hello).
-
-## Issues
-- There is an issue with the latest version of grpc-gateway
-    - https://github.com/grpc-ecosystem/grpc-gateway/issues/384#issuecomment-300863457
-    - Install version 1.2.2 from the vendor directory
-        - `go install ./github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway`
-        - `go install ./github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger`

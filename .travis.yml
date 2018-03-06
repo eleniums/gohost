@@ -3,6 +3,7 @@ language: go
 go:
   - 1.8.x
   - 1.9.x
+  - 1.10.x
   - master
 
 sudo: false
@@ -15,4 +16,4 @@ install:
   - dep ensure -v
 
 script:
-  - go test -v -cover -service-start-delay 1000ms -http-client-timeout 60000ms
+  - go test -v ./test -service-start-delay 1000ms -http-client-timeout 60000ms

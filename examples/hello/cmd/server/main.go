@@ -6,6 +6,9 @@ import (
 
 	"github.com/eleniums/gohost"
 	"github.com/eleniums/gohost/examples/hello"
+	"google.golang.org/grpc"
+
+	pb "github.com/eleniums/gohost/examples/hello/proto"
 )
 
 func main() {
@@ -13,7 +16,7 @@ func main() {
 	grpcAddr := flag.String("grpc-addr", "127.0.0.1:50051", "host and port to host the gRPC endpoint")
 	httpAddr := flag.String("http-addr", "127.0.0.1:9090", "host and port to host the HTTP endpoint")
 	debugAddr := flag.String("debug-addr", "127.0.0.1:6060", "host and port to host the debug endpoint (/debug/pprof and /debug/vars)")
-	enableCors := flag.Bool("enable-cors", false, "true to enable cross-origin resource sharing (CORS)")
+	enableDebug := flag.Bool("enable-debug", false, "true to enable the debug endpoint (/debug/pprof and /debug/vars)")
 	certFile := flag.String("cert-file", "", "cert file for enabling a TLS connection")
 	keyFile := flag.String("key-file", "", "key file for enabling a TLS connection")
 	insecureSkipVerify := flag.Bool("insecure-skip-verify", false, "true to skip verifying the certificate chain and host name")
@@ -25,16 +28,23 @@ func main() {
 	service := hello.NewService()
 
 	// create the hoster
-	hoster := gohost.NewHoster(service, *grpcAddr)
+	hoster := gohost.NewHoster()
+	hoster.GRPCAddr = *grpcAddr
 	hoster.HTTPAddr = *httpAddr
 	hoster.DebugAddr = *debugAddr
-	hoster.EnableCORS = *enableCors
+	hoster.EnableDebug = *enableDebug
 	hoster.CertFile = *certFile
 	hoster.KeyFile = *keyFile
 	hoster.InsecureSkipVerify = *insecureSkipVerify
 	hoster.MaxSendMsgSize = *maxSendMsgSize
 	hoster.MaxRecvMsgSize = *maxRecvMsgSize
-	hoster.Logger = log.Printf
+
+	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+		log.Printf("Registered gRPC endpoint at: %v", *grpcAddr)
+		pb.RegisterHelloServiceServer(s, service)
+	})
+
+	hoster.RegisterHTTPEndpoint(pb.RegisterHelloServiceHandlerFromEndpoint)
 
 	// start the server
 	err := hoster.ListenAndServe()
