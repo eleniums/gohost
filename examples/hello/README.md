@@ -12,7 +12,7 @@ A simple example service that demonstrates how to use a Hoster instance to host 
 - Insecure
     - `go run cmd/server/main.go`
 - With TLS
-    - `go run cmd/server/main.go -cert-file ../../test/testdata/test.crt -key-file ../../test/testdata/test.key -insecure-skip-verify`
+    - `go run cmd/server/main.go -cert-file ../../testdata/test.crt -key-file ../../testdata/test.key -insecure-skip-verify`
 
 NOTE: insecure-skip-verify is only used for testing when the host name does not need to be verified and should not be used in production.
 
