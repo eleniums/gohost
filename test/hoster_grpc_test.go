@@ -63,8 +63,8 @@ func Test_Hoster_ListenAndServe_GRPC_WithTLS(t *testing.T) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
-	hoster.CertFile = "./testdata/test.crt"
-	hoster.KeyFile = "./testdata/test.key"
+	hoster.CertFile = "../testdata/test.crt"
+	hoster.KeyFile = "../testdata/test.key"
 
 	// act - start the service
 	go hoster.ListenAndServe()
@@ -132,8 +132,8 @@ func Test_Hoster_ListenAndServe_GRPC_InvalidCertFile(t *testing.T) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
-	hoster.CertFile = "./testdata/badcert.crt"
-	hoster.KeyFile = "./testdata/test.key"
+	hoster.CertFile = "../testdata/badcert.crt"
+	hoster.KeyFile = "../testdata/test.key"
 
 	// act - start the service
 	err := hoster.ListenAndServe()
@@ -153,8 +153,8 @@ func Test_Hoster_ListenAndServe_GRPC_InvalidKeyFile(t *testing.T) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
-	hoster.CertFile = "./testdata/test.crt"
-	hoster.KeyFile = "./testdata/badkey.key"
+	hoster.CertFile = "../testdata/test.crt"
+	hoster.KeyFile = "../testdata/badkey.key"
 
 	// act - start the service
 	err := hoster.ListenAndServe()

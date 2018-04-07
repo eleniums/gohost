@@ -78,8 +78,8 @@ func Test_Hoster_ListenAndServe_HTTP_WithTLS(t *testing.T) {
 	hoster.HTTPAddr = httpAddr
 	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
-	hoster.CertFile = "./testdata/test.crt"
-	hoster.KeyFile = "./testdata/test.key"
+	hoster.CertFile = "../testdata/test.crt"
+	hoster.KeyFile = "../testdata/test.key"
 	hoster.InsecureSkipVerify = true
 
 	// act - start the service
@@ -148,8 +148,8 @@ func Test_Hoster_ListenAndServe_HTTP_InvalidCertFile(t *testing.T) {
 	hoster.HTTPAddr = httpAddr
 	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
-	hoster.CertFile = "./testdata/badcert.crt"
-	hoster.KeyFile = "./testdata/test.key"
+	hoster.CertFile = "../testdata/badcert.crt"
+	hoster.KeyFile = "../testdata/test.key"
 
 	// act - start the service
 	err := hoster.ListenAndServe()
@@ -166,8 +166,8 @@ func Test_Hoster_ListenAndServe_HTTP_InvalidKeyFile(t *testing.T) {
 	hoster.HTTPAddr = httpAddr
 	hoster.RegisterHTTPEndpoint(pb.RegisterTestServiceHandlerFromEndpoint)
 
-	hoster.CertFile = "./testdata/test.crt"
-	hoster.KeyFile = "./testdata/badkey.key"
+	hoster.CertFile = "../testdata/test.crt"
+	hoster.KeyFile = "../testdata/badkey.key"
 
 	// act - start the service
 	err := hoster.ListenAndServe()
