@@ -16,4 +16,4 @@ install:
   - dep ensure -v
 
 script:
-  - go test -race -v ./test -service-start-delay 1000ms -http-client-timeout 60000ms
+  - go test -v -race -cover ./test -service-start-delay 1000ms -http-client-timeout 60000ms
