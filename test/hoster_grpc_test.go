@@ -8,11 +8,11 @@ import (
 
 	"github.com/eleniums/gohost"
 	"github.com/eleniums/gohost/examples/test"
-	pb "github.com/eleniums/gohost/examples/test/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	pb "github.com/eleniums/gohost/examples/test/proto"
 	assert "github.com/stretchr/testify/require"
 )
 
