@@ -19,14 +19,14 @@
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
-  version = "v1.0.0"
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
   packages = ["."]
-  revision = "eb23b08d08bbe930113a6512a7a829050341448c"
+  revision = "e9c5d9645c437ab1b204cff969a2c0fb16cd4276"
 
 [[projects]]
   name = "github.com/grpc-ecosystem/grpc-gateway"
@@ -35,8 +35,8 @@
     "runtime/internal",
     "utilities"
   ]
-  revision = "07f5e79768022f9a3265235f0db4ac8c3f675fec"
-  version = "v1.3.1"
+  revision = "92583770e3f01b09a0d3e9bdf64321d8bebd48f2"
+  version = "v1.4.1"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -50,22 +50,22 @@
     "assert",
     "require"
   ]
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
     "internal/timeseries",
-    "lex/httplex",
     "trace"
   ]
-  revision = "d25186b37f34ebdbbea8f488ef055638dfab272d"
+  revision = "a680a1efc54dd51c040b3b5ce4939ea3cf2ea0d1"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -95,7 +95,7 @@
     "googleapis/api/annotations",
     "googleapis/rpc/status"
   ]
-  revision = "df60624c1e9b9d2973e889c7a1cff73155da81c4"
+  revision = "fedd2861243fd1a8152376292b921b394c7bef7e"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -109,9 +109,11 @@
     "credentials",
     "encoding",
     "encoding/proto",
-    "grpclb/grpc_lb_v1/messages",
     "grpclog",
     "internal",
+    "internal/backoff",
+    "internal/channelz",
+    "internal/grpcrand",
     "keepalive",
     "metadata",
     "naming",
@@ -124,12 +126,12 @@
     "tap",
     "transport"
   ]
-  revision = "8e4536a86ab602859c20df5ebfd0bd4228d08655"
-  version = "v1.10.0"
+  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
+  version = "v1.13.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b0abd303f7a09f6e4a7907929e0c1d15dfd2a92d2ccaad8e3f17a5e0ab572c46"
+  inputs-digest = "e43fb24dceadffa75f5cdd6acd4b2162b922b5e0199ebdaf11b12304053952d6"
   solver-name = "gps-cdcl"
   solver-version = 1
