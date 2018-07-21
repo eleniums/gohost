@@ -40,12 +40,12 @@ func (h *Hoster) serveHTTP() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// register servers
+	// register gateways
 	mux := runtime.NewServeMux()
-	for i := range h.httpEndpoints {
-		err := h.httpEndpoints[i](ctx, mux, h.GRPCAddr, opts)
+	for i := range h.httpGateways {
+		err := h.httpGateways[i](ctx, mux, h.GRPCAddr, opts)
 		if err != nil {
-			return fmt.Errorf("failed to register HTTP endpoint: %v", err)
+			return fmt.Errorf("failed to register HTTP gateway: %v", err)
 		}
 	}
 

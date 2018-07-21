@@ -25,18 +25,18 @@ const (
 	DefaultMaxRecvMsgSize = 1024 * 1024 * 4
 )
 
-// GRPCEndpoint is used to register a gRPC endpoint.
-type GRPCEndpoint func(s *grpc.Server)
+// GRPCServer is used to register a gRPC server.
+type GRPCServer func(s *grpc.Server)
 
-// HTTPEndpoint is used to register a HTTP endpoint for forwarding requests to a gRPC endpoint.
-type HTTPEndpoint func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+// HTTPGateway is used to register a HTTP gateway for forwarding requests to a gRPC endpoint.
+type HTTPGateway func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 
 // Hoster is used to serve gRPC and HTTP endpoints.
 type Hoster struct {
-	// GRPCAddr is the endpoint (host and port) on which to host the gRPC services. Default is 127.0.0.1:50051. May be left blank if no gRPC endpoints have been registered.
+	// GRPCAddr is the endpoint (host and port) on which to host the gRPC service. Default is 127.0.0.1:50051. May be left blank if no gRPC servers have been registered.
 	GRPCAddr string
 
-	// HTTPAddr is the endpoint (host and port) on which to host the HTTP services. Default is 127.0.0.1:9090. May be left blank if no HTTP endpoints have been registered.
+	// HTTPAddr is the endpoint (host and port) on which to host the HTTP service. Default is 127.0.0.1:9090. May be left blank if no HTTP gateways have been registered.
 	HTTPAddr string
 
 	// DebugAddr is the endpoint (host and port) on which to host the debug endpoint (/debug/pprof and /debug/vars). Default is 127.0.0.1:6060. May be left blank if EnableDebug is false.
@@ -69,11 +69,11 @@ type Hoster struct {
 	// StreamInterceptors is an array of stream interceptors to be used by the service. They will be executed in order, from first to last.
 	StreamInterceptors []grpc.StreamServerInterceptor
 
-	// grpcEndpoints is an array of gRPC endpoints to be hosted.
-	grpcEndpoints []GRPCEndpoint
+	// grpcServers is an array of gRPC servers to be hosted.
+	grpcServers []GRPCServer
 
-	// httpEndpoints is an array of HTTP endpoints to be hosted.
-	httpEndpoints []HTTPEndpoint
+	// httpGateways is an array of HTTP gateways to be hosted.
+	httpGateways []HTTPGateway
 }
 
 // NewHoster creates a new hoster instance with defaults set.
@@ -87,14 +87,14 @@ func NewHoster() *Hoster {
 	}
 }
 
-// RegisterGRPCEndpoint will add a function for registering a gRPC endpoint. The function is invoked when ListenAndServe is called.
-func (h *Hoster) RegisterGRPCEndpoint(endpoints ...GRPCEndpoint) {
-	h.grpcEndpoints = append(h.grpcEndpoints, endpoints...)
+// RegisterGRPCServer will add a function for registering a gRPC server. The function is invoked when ListenAndServe is called.
+func (h *Hoster) RegisterGRPCServer(servers ...GRPCServer) {
+	h.grpcServers = append(h.grpcServers, servers...)
 }
 
-// RegisterHTTPEndpoint will add a function for registering a HTTP endpoint. The function is invoked when ListenAndServe is called.
-func (h *Hoster) RegisterHTTPEndpoint(handlers ...HTTPEndpoint) {
-	h.httpEndpoints = append(h.httpEndpoints, handlers...)
+// RegisterHTTPGateway will add a function for registering a HTTP gateway. The function is invoked when ListenAndServe is called.
+func (h *Hoster) RegisterHTTPGateway(gateways ...HTTPGateway) {
+	h.httpGateways = append(h.httpGateways, gateways...)
 }
 
 // ListenAndServe creates and starts the server.
@@ -109,14 +109,14 @@ func (h *Hoster) ListenAndServe() error {
 	}
 
 	// serve HTTP endpoint
-	if len(h.httpEndpoints) > 0 {
+	if len(h.httpGateways) > 0 {
 		go func() {
 			errc <- h.serveHTTP()
 		}()
 	}
 
 	// serve gRPC endpoint
-	if len(h.grpcEndpoints) > 0 {
+	if len(h.grpcServers) > 0 {
 		go func() {
 			errc <- h.serveGRPC()
 		}()
