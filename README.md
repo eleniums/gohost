@@ -65,11 +65,11 @@ hoster.InsecureSkipVerify = *insecureSkipVerify
 hoster.MaxSendMsgSize = *maxSendMsgSize
 hoster.MaxRecvMsgSize = *maxRecvMsgSize
 
-hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+hoster.RegisterGRPCServer(func(s *grpc.Server) {
 	pb.RegisterHelloServiceServer(s, service)
 })
 
-hoster.RegisterHTTPEndpoint(pb.RegisterHelloServiceHandlerFromEndpoint)
+hoster.RegisterHTTPGateway(pb.RegisterHelloServiceHandlerFromEndpoint)
 
 // start the server
 err := hoster.ListenAndServe()

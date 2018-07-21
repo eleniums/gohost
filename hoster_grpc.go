@@ -33,15 +33,13 @@ func (h *Hoster) serveGRPC() error {
 		opts = append(opts, streamInterceptorChain)
 	}
 
-	// start the gRPC endpoint
+	// add TLS credentials to options if necessary
 	if h.isTLSEnabled() {
-		// create TLS credentials
 		creds, err := credentials.NewServerTLSFromFile(h.CertFile, h.KeyFile)
 		if err != nil {
 			return fmt.Errorf("failed to load TLS credentials: %v", err)
 		}
 
-		// add TLS credentials to options
 		opts = append(opts, grpc.Creds(creds))
 	}
 
@@ -53,11 +51,11 @@ func (h *Hoster) serveGRPC() error {
 
 	// register servers
 	server := grpc.NewServer(opts...)
-	for i := range h.grpcEndpoints {
-		h.grpcEndpoints[i](server)
+	for i := range h.grpcServers {
+		h.grpcServers[i](server)
 	}
 
-	// start servers
+	// start the gRPC endpoint
 	return server.Serve(lis)
 }
 

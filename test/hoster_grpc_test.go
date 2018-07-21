@@ -25,7 +25,7 @@ func Test_Hoster_ListenAndServe_GRPC_Successful(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -59,7 +59,7 @@ func Test_Hoster_ListenAndServe_GRPC_WithTLS(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -93,7 +93,7 @@ func Test_Hoster_ListenAndServe_GRPC_EmptyAddress(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = ""
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -110,7 +110,7 @@ func Test_Hoster_ListenAndServe_GRPC_InvalidAddress(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = "badaddress"
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -128,7 +128,7 @@ func Test_Hoster_ListenAndServe_GRPC_InvalidCertFile(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -149,7 +149,7 @@ func Test_Hoster_ListenAndServe_GRPC_InvalidKeyFile(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -172,7 +172,7 @@ func Test_Hoster_ListenAndServe_GRPC_MaxRecvMsgSize_Pass(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -208,7 +208,7 @@ func Test_Hoster_ListenAndServe_GRPC_MaxRecvMsgSize_Fail(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -241,7 +241,7 @@ func Test_Hoster_ListenAndServe_GRPC_MaxSendMsgSize_Pass(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -275,7 +275,7 @@ func Test_Hoster_ListenAndServe_GRPC_MaxSendMsgSize_Fail(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -310,7 +310,7 @@ func Test_Hoster_ListenAndServe_GRPC_UnaryInterceptor(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 
@@ -359,7 +359,7 @@ func Test_Hoster_ListenAndServe_GRPC_StreamInterceptor(t *testing.T) {
 
 	hoster := gohost.NewHoster()
 	hoster.GRPCAddr = grpcAddr
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterTestServiceServer(s, service)
 	})
 

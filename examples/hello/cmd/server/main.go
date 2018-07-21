@@ -39,12 +39,13 @@ func main() {
 	hoster.MaxSendMsgSize = *maxSendMsgSize
 	hoster.MaxRecvMsgSize = *maxRecvMsgSize
 
-	hoster.RegisterGRPCEndpoint(func(s *grpc.Server) {
-		log.Printf("Registered gRPC endpoint at: %v", *grpcAddr)
+	hoster.RegisterGRPCServer(func(s *grpc.Server) {
 		pb.RegisterHelloServiceServer(s, service)
 	})
+	log.Printf("Registered gRPC endpoint at: %v", *grpcAddr)
 
-	hoster.RegisterHTTPEndpoint(pb.RegisterHelloServiceHandlerFromEndpoint)
+	hoster.RegisterHTTPGateway(pb.RegisterHelloServiceHandlerFromEndpoint)
+	log.Printf("Registered HTTP endpoint at: %v", *httpAddr)
 
 	// start the server
 	err := hoster.ListenAndServe()
