@@ -8,7 +8,6 @@ A tool for hosting a Go service with gRPC and HTTP endpoints.
 
 ```
 go get -u github.com/eleniums/gohost
-dep ensure
 ```
 
 ## Prerequisites
