@@ -8,6 +8,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/eleniums/async"
+  packages = ["."]
+  revision = "24f392e91a345b37448b6f964d1edfb31d1937a5"
+  version = "v2.0.0"
+
+[[projects]]
   name = "github.com/golang/protobuf"
   packages = [
     "jsonpb",
@@ -66,6 +72,12 @@
     "trace"
   ]
   revision = "a680a1efc54dd51c040b3b5ce4939ea3cf2ea0d1"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -132,6 +144,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e43fb24dceadffa75f5cdd6acd4b2162b922b5e0199ebdaf11b12304053952d6"
+  inputs-digest = "f13ec38016bf038ddf8df40691c7447e68f1a9facc705f828407a92391ed075e"
   solver-name = "gps-cdcl"
   solver-version = 1

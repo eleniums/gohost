@@ -3,6 +3,7 @@ package gohost
 import (
 	"net/http"
 
+	"github.com/eleniums/async"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -99,28 +100,30 @@ func (h *Hoster) RegisterHTTPGateway(gateways ...HTTPGateway) {
 
 // ListenAndServe creates and starts the server.
 func (h *Hoster) ListenAndServe() error {
-	errc := make(chan error)
+	tasks := []async.Task{}
 
 	// serve debug endpoint
 	if h.EnableDebug {
-		go func() {
-			errc <- h.serveDebug()
-		}()
+		tasks = append(tasks, func() error {
+			return h.serveDebug()
+		})
 	}
 
 	// serve HTTP endpoint
 	if len(h.httpGateways) > 0 {
-		go func() {
-			errc <- h.serveHTTP()
-		}()
+		tasks = append(tasks, func() error {
+			return h.serveHTTP()
+		})
 	}
 
 	// serve gRPC endpoint
 	if len(h.grpcServers) > 0 {
-		go func() {
-			errc <- h.serveGRPC()
-		}()
+		tasks = append(tasks, func() error {
+			return h.serveGRPC()
+		})
 	}
 
-	return <-errc
+	errc := async.Run(tasks...)
+
+	return async.Wait(errc)
 }
