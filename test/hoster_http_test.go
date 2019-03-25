@@ -85,8 +85,8 @@ func Test_Hoster_ListenAndServe_HTTP_WithTLS(t *testing.T) {
 	// act - start the service
 	go hoster.ListenAndServe()
 
-	// make sure service has time to start
-	time.Sleep(serviceStartDelay)
+	// make sure service has time to start (with a little extra time since this is slower than others)
+	time.Sleep(serviceStartDelay + time.Second)
 
 	// call the service at the HTTP endpoint
 	httpClient := http.Client{
