@@ -4,6 +4,10 @@
 
 A tool for hosting a Go service with gRPC and HTTP endpoints.
 
+**It is generally better to just use the standard libraries directly. Less bloat and more control over configuration. See:**
+- net/http: https://golang.org/pkg/net/http
+- gRPC: https://github.com/grpc/grpc-go
+
 ## Installation
 
 ```
